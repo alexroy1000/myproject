@@ -3,3 +3,5 @@
 	rating $20/hr
 
 2. Test github
+
+3. Create Shirt
