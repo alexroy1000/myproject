@@ -1,3 +1,5 @@
 1. Take a hourly task. 
 
 	rating $20/hr
+
+2. Test github
