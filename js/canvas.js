@@ -434,6 +434,7 @@ function drawCharacters(fontid, $that, x, y) {
     
     item.set('id', id);
     item.set('objType', 'text');
+    item.set('HtmlColor', 'rgb(0,0,0)');
 
     item.scale(0.1);
     item.sizelock = false;
@@ -560,23 +561,46 @@ function updateObjColor() {
     }
 
     var selectedObjId = selectedObj.id;
-    var ca = design_clipart[selectedObjId];
-    var source   = getCanvasObjects([ca.CanvasObject]);
-    // Add mix colored Object.
-    var item = new fabric.Image(getCanvasObjects([ca.CanvasObject]), {        
-        left:   selectedObj.left,
-        top:    selectedObj.top,
-        width:  selectedObj.getWidth(),
-        height: selectedObj.getHeight(),
-        angle:  selectedObj.getAngle(),
-        // opacity : 0.5,
-        originX: 'center',
-        originY: 'center'
-    });
+    var selectedObjType = selectedObj.type;
+    var ca;
+    var source;
+    var item;
+
+    if(selectedObjType == 'image') {
+        ca = design_clipart[selectedObjId];   
+        source = getCanvasObjects([ca.CanvasObject]);
+         // Add mix colored Object.
+        item = new fabric.Image(getCanvasObjects([ca.CanvasObject]), {        
+            left:   selectedObj.left,
+            top:    selectedObj.top,
+            width:  selectedObj.getWidth(),
+            height: selectedObj.getHeight(),
+            angle:  selectedObj.getAngle(),
+            // opacity : 0.5,
+            originX: 'center',
+            originY: 'center'
+        }); 
+    }
+    else{
+
+        ca = design_text[selectedObjId];
+        source = getCanvasObjects_font([ca.CanvasObject]);
+        item = new fabric.Image(getCanvasObjects_font([ca.CanvasObject]), {        
+            left:   selectedObj.left,
+            top:    selectedObj.top,
+            width:  selectedObj.getWidth(),
+            height: selectedObj.getHeight(),
+            angle:  selectedObj.getAngle(),
+            // opacity : 0.5,
+            originX: 'center',
+            originY: 'center'
+        });
+    }
+
     // item.scale(0.2);
 
     item.set('id', selectedObjId);
-    item.set('objType', 'image');
+    item.set('objType', selectedObjType);
     canvas.add(item);
    
     // Remove selected Object.
@@ -586,7 +610,9 @@ function updateObjColor() {
     canvas.setActiveObject(item);
 
     // Update object layer's image.
-    var cid = 'image_' + selectedObjId;
+    var cid = selectedObjType + '_' + selectedObjId;
+    console.log(cid);
+
     $('#clipart_layer').find("[data-id='" + cid + "']").attr('src', item.toDataURL('png'));
                     
     var mycanvas = document.getElementById(cid);
@@ -952,6 +978,13 @@ function selectTextObj(selectedObj) {
     selectedObj.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
     $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
     $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
+
+     var ca = design_text[selectedObjId];
+     var html = '';
+     html += '<a class="btn btn-default colorpicker selectcolor" data-id="0" style="background-color: ' 
+             + ca.HtmlColor 
+             + '"></a>';
+      $('.colorlayer').html(html);       
 }
 
 function selectClipartObj(selectedObj) {
@@ -1020,21 +1053,19 @@ $('body').on('click', '#colorpad a', function(event) {
         if (design_clipart[activeObj.id].design_colors.length <= selectedColorlayer) {
             selectedColorlayer = 0;
         }
-
         design_clipart[activeObj.id].design_colors[selectedColorlayer].HtmlColor = $(this).css('background-color');
-        $('.colorlayer').children().eq(selectedColorlayer).css('background-color', $(this).css('background-color'));
-        $('.colorlayer').children().eq(selectedColorlayer).css('background-image', '');
-        isSelectedColor = true;
-
         design_colors = design_clipart[activeObj.id].design_colors;
-
-        updateObjColor();
     } else {
-        isSelectedColor = true;
-        
-        activeObj.set('fill' , $(this).css('background-color'));
-        canvas.renderAll();
+        design_text[activeObj.id].HtmlColor = $(this).css('background-color');
+        selectedColorlayer = 0;
     }
+
+    $('.colorlayer').children().eq(selectedColorlayer).css('background-color', $(this).css('background-color'));
+    $('.colorlayer').children().eq(selectedColorlayer).css('background-image', '');
+    isSelectedColor = true;
+
+    updateObjColor();
+    
 });
 
 // Select a pattern in pattern pad.
@@ -1045,26 +1076,32 @@ $('body').on('click', '#patternpad a', function(event) {
         if (design_clipart[activeObj.id].design_colors.length <= selectedColorlayer) {
             selectedColorlayer = 0;
         }
-
-        design_clipart[activeObj.id].design_colors[selectedColorlayer].HtmlColor = $(this).next().attr('id');
-        $('.colorlayer').children().eq(selectedColorlayer).css('background-color', '');
-        $('.colorlayer').children().eq(selectedColorlayer).css('background-image', $(this).css('background-image'));
-        
+        design_clipart[activeObj.id].design_colors[selectedColorlayer].HtmlColor = $(this).css('background-color');
         design_colors = design_clipart[activeObj.id].design_colors;
-
-        updateObjColor();    
     } else {
-        $('.colorlayer').children().eq(0).css('background-color', '');
-        $('.colorlayer').children().eq(0).css('background-image', $(this).css('background-image'));
-
-        fabric.util.loadImage($(this).next().attr('src'), function(img) {
-            activeObj.fill = new fabric.Pattern({
-                source: img,
-                repeat: 'repeat'
-            });
-            canvas.renderAll();
-        });
+        design_text[activeObj.id].HtmlColor = $(this).css('background-color');
+        selectedColorlayer = 0;
     }
+
+    design_clipart[activeObj.id].design_colors[selectedColorlayer].HtmlColor = $(this).next().attr('id');
+    $('.colorlayer').children().eq(selectedColorlayer).css('background-color', '');
+    $('.colorlayer').children().eq(selectedColorlayer).css('background-image', $(this).css('background-image'));
+    
+    design_colors = design_clipart[activeObj.id].design_colors;
+
+    updateObjColor();    
+    // } else {
+    //     $('.colorlayer').children().eq(0).css('background-color', '');
+    //     $('.colorlayer').children().eq(0).css('background-image', $(this).css('background-image'));
+
+    //     fabric.util.loadImage($(this).next().attr('src'), function(img) {
+    //         activeObj.fill = new fabric.Pattern({
+    //             source: img,
+    //             repeat: 'repeat'
+    //         });
+    //         canvas.renderAll();
+    //     });
+    // }
 });
 
 var ratio;
