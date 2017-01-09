@@ -359,6 +359,7 @@ function getCharacters(fontid, characters) {
                     // height: c.CanvasObject.Height
                     // stroke: 'red',
                     // strokeWidth: 10
+                    fill    : '#1c1a1c'
                 }));
                 // console.log("getCharacters, c.CanvasObject.ID:" + c.CanvasObject.ID);
                 left += c.CanvasObject.Width + spacing;
@@ -611,8 +612,6 @@ function updateObjColor() {
 
     // Update object layer's image.
     var cid = selectedObjType + '_' + selectedObjId;
-    console.log(cid);
-
     $('#clipart_layer').find("[data-id='" + cid + "']").attr('src', item.toDataURL('png'));
                     
     var mycanvas = document.getElementById(cid);
@@ -898,10 +897,10 @@ function getColorPalette() {
                 $('.cliparteditor #patternpad').html(stry);
                 $('.cliparteditor #colorx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + col_group_name);
                 $('.cliparteditor #patternx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + pattern_group_name);
-                $('.texteditor #colorpad').html(strx);
-                $('.texteditor #patternpad').html(stry);
-                $('.texteditor #colorx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + col_group_name);
-                $('.texteditor #patternx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + pattern_group_name);
+                $('.texteditor #textcolorpad').html(strx);
+                $('.texteditor #textpatternpad').html(stry);
+                $('.texteditor #textcolorx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + col_group_name);
+                $('.texteditor #textpatternx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + pattern_group_name);
             }
         }
     });
@@ -1067,7 +1066,6 @@ $('body').on('click', '#colorpad a', function(event) {
     updateObjColor();
     
 });
-
 // Select a pattern in pattern pad.
 $('body').on('click', '#patternpad a', function(event) {
     isSelectedColor = true;
@@ -1332,6 +1330,7 @@ if(activeObj.objType == "image")
     }
     var prev    = selLi.prev();
     prev.before(selLi);
+    canvas.renderAll();
 });
 
 $('.layer_down').click(function(event) {
@@ -1355,6 +1354,7 @@ $('.layer_down').click(function(event) {
     }
     var next    = selLi.next();
     next.after(selLi);
+    canvas.renderAll();
 });
 
 $('.position_center').click(function(event) {
@@ -1532,6 +1532,7 @@ function updatelayersection() {
 }
 
 function removeEditPanel() {
+
     if ( ! isSelectedColor) {
         $(".colortab_custom").hide();    
     }
@@ -1609,7 +1610,12 @@ $('#add_text').click(function(event) {
 //        // }  
 // });
 $('#dlFonts_form').change(function(){
-           drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);        
+        //   drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);        
+    if(activeObj.objType == "text")
+    {
+        //drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);   
+        updateCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);
+    }
 });
 
 $('body').on('click','.colorpicker',function(e) {

@@ -231,6 +231,7 @@ select.prod-sort {
 
 .rangesty {
 	padding-top: 20px;
+    width:;
 }
 
 .span_bold{
@@ -449,17 +450,31 @@ input[type=range]:focus::-ms-fill-upper {
     height: 140px;
 }
 .shirtimg{
-    z-index: 999;
+    z-index: 9999;
     margin-top: -100px;
     margin-right: -85px;
     width: 100px;
     height: 140px;
     float:right;
 }
-.editcolorbox{
+.col-md-4.editcolorbox{
     z-index: 998;
     margin-left: 0px;
     padding-top: 100px;
+    /*width:630px !important;*/
+
+}
+.col-md-offset-1{
+    /*margin-left: 157px !important;*/
+}
+.col-md-7{
+    /*width: 1109px !important;*/
+}
+.col-sm-4.editcolorbox{
+    z-index: 998;
+    margin-left: 0px;
+    padding-top: 100px;
+    /*width:630px !important;*/
 
 }
 .toolbox{
@@ -562,4 +577,7 @@ div.panel.show {
 }
 textarea{
     resize: none;
+}
+.container-fluid{
+    width:1905px;
 }
