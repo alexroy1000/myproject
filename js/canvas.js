@@ -115,11 +115,11 @@ Product.prototype.setSelectObj = function (item) {
     $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
     $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
 
-     var html = '';
-     html += '<a class="btn btn-default colorpicker selectcolor" data-id="0" style="background-color: ' 
-             + "red" 
-             + '"></a>';
-      $('.colorlayer').html(html);
+     // var html = '';
+     // html += '<a class="btn btn-default colorpicker selectcolor" data-id="0" style="background-color: ' 
+     //         + "red" 
+     //         + '"></a>';
+     //  $('.colorlayer').html(html);
     }
 };
 Product.prototype.updateDesignColor = function (item,i,colorstr){
@@ -129,11 +129,10 @@ Product.prototype.updateDesignColor = function (item,i,colorstr){
         alert('Please select a Object.');
         return;
     }
-    var ca = item.sevData;
+    console.log(colorstr);
+    var ca;
     var source;
-    var changeitem;
-    if(item.objType == "image")
-    {
+    var changeitem;  ca = item.sevData;
         ca.CanvasObject.Colors[i].HtmlColor = colorstr;
         source = getCanvasObjects([ca.CanvasObject],item.objType);
         changeitem = new fabric.Image(source, {        
@@ -151,20 +150,7 @@ Product.prototype.updateDesignColor = function (item,i,colorstr){
             placementID : item.placementID
         });  
         changeitem.sizelock = ca.LockSize;
-    }
-    else if(item.objType == "text")
-    {
-        source = getCanvasObjects([ca.CanvasObject],item.objType);
-        changeitem = new fabric.Image(source, {        
-            left:   item.left,
-            top:    item.top,
-            width:  item.getWidth(),
-            height: item.getHeight(),
-            angle:  item.getAngle(),
-            originX: 'center',
-            originY: 'center'
-        });
-    }
+    
     console.log(item.left+"_"+item.top);
     item.sizelock = ca.LockSize;
     changeitem.set('id',item.id);
@@ -192,6 +178,83 @@ Product.prototype.updateDesignColor = function (item,i,colorstr){
     myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
      
 };
+Product.prototype.updateTextDesign= function(item, fontid, str, fillcolor, strokecolor){
+
+   var selectedObj = canvas.getActiveObject();
+   if (item.length == 0)
+   return;
+   var id = item.id ;
+   if(item.text == str)
+   {
+      var item    = getCharacters(fontid, item.text,fillcolor,strokecolor);
+   }
+   else{
+      var item    = getCharacters(fontid, str,fillcolor,strokecolor);
+   }
+   item.set('objType', 'text');
+   item.set('fillColor', fillcolor);
+   item.set('strokeColor', strokecolor);
+   item.set('text',str);
+   item.set('placementID',item.placementID);
+   item.scale(0.1);
+   item.sizelock = false;
+   _render(item);
+   canvas.remove(selectedObj);
+   canvas.add(item);
+   
+   // preview image
+
+   canvas.setActiveObject(item);
+   // object layer
+  // $('#clipart_layer').find('li.active').removeClass('active');
+  // $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
+   // active clipart object.
+   product.setSelectObj(item);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// console.log(item.left+"_"+item.top);
+//     item.sizelock = ca.LockSize;
+//     changeitem.set('id',item.id);
+//     changeitem.set('objType', item.objType);
+//     canvas.add(changeitem);
+//     canvas.remove(item);
+//     canvas.setActiveObject(changeitem);
+//     for (var i =0 ; i<product.Design_List.length  ; i++) {     
+//        if( product.Design_List[i].placementID == item.placementID)
+//        {
+//             //product.Design_List[i].shapes.push(item);
+//             for (var j = 0; j < product.Design_List[i].shapes.length; j++) {
+//                 if(product.Design_List[i].shapes[j].id == changeitem.id)
+//                 {
+//                     product.Design_List[i].shapes[j] = changeitem;
+//                 }
+//             }
+//             break;
+//        }
+
+//     }
+//     var cid = changeitem.objType + '_' + changeitem.id; 
+//     var mycanvas = document.getElementById(cid);
+//     var myctx    = mycanvas.getContext('2d');
+//     myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
+}
 var product;
 var sessionid;
 var fonts = [];
@@ -372,10 +435,9 @@ function getCanvasObjects(data_array,objtype) {
     return (cTemp);
 }
 
-function getCharacters(fontid, characters) {476
-    var cliparts    = [];
-    var spacing     = 0;
-    var stretch     = 1;
+function getCharacters(fontid, characters, fillcolorstr, strokecolor,x,y) {
+ var cliparts    = [];
+    var spacing     = 1;
     var left        = canvas.width / 2;
     var height      = 0;
     // console.log(fontid);
@@ -384,13 +446,20 @@ function getCharacters(fontid, characters) {476
         for (var j = 0; j < fonts[fontid].Characters.length; j++) {
 
             var c = fonts[fontid].Characters[j];
-            console.log(c);
+            c.CanvasObject.Groups[0].Stroke = {
+             HtmlColor:strokecolor,
+             Pattern:""
+            }
             if (c.Character == characters[i]) {
                 // console.log(c.Character + ':' + c.CanvasObject.Height)
                 if (c.CanvasObject.Height > height) {
                     height = c.CanvasObject.Height;
+                    
                 }
-
+                console.log(c);
+                c.CanvasObject.Groups[0].Fill.HtmlColor = fillcolorstr;
+                c.CanvasObject.Groups[0].StrokeWidth = 15;
+                console.log(c);
                 cliparts.push(new fabric.Image(getCanvasObjects([c.CanvasObject],"text"), {                   
                     left    : left,
                     top     : canvas.height / 2,
@@ -400,9 +469,7 @@ function getCharacters(fontid, characters) {476
                     height  : c.CanvasObject.Height,
                     // stroke  : '#1c1a1c',
                     // strokeWidth: 5,
-                    fill    : '#1c1a1c',
-                    font    :  fontid,
-                    text    :  characters
+                    
                 }));
                 // console.log("getCharacters, c.CanvasObject.ID:" + c.CanvasObject.ID);
                 left += c.CanvasObject.Width + spacing;
@@ -474,9 +541,12 @@ function drawCharacters(fontid, $that, x, y,colorstr,placementID) {
     return;
     var id      = product.getID();
     var item    = getCharacters(fontid, characters, colorstr,colorstr);
-    console.log(item);
-    item.set('id', id);
+   // console.log(item);
     item.set('objType', 'text');
+    item.set('fillColor', colorstr);
+    item.set('strokeColor', colorstr);
+    item.set('text',characters);
+    item.set('placementID',placementID);
     item.scale(0.1);
     item.sizelock = false;
     _render(item);
@@ -505,38 +575,6 @@ function drawCharacters(fontid, $that, x, y,colorstr,placementID) {
     $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
 	$('#clipart_layer').find('#text_' + id).attr('src', item.toDataURL('png'));
     product.setSelectObj(item);
-}
-
-
-function updateCharacters(fontsid,$that, x,y )
-{
-    var selectedObj = canvas.getActiveObject();
-    var characters = $that.val();
-    if (characters.length == 0)
-    return;
-    var id      = design_clipart.length;
-
-    var item    = getCharacters(fontsid, characters);
-    
-    item.set('id', id);
-    item.set('objType', 'text');
-    item.set('HtmlColor', 'rgb(0,0,0)');
-
-    item.scale(0.1);
-    item.sizelock = false;
-    _render(item);
-    canvas.remove(selectedObj);
-    canvas.add(item);
-    
-    // preview image
-
-    canvas.setActiveObject(item);
-    // object layer
-    $('#clipart_layer').find('li.active').removeClass('active');
-    $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
-    // active clipart object.
-    selectTextObj(item);
-    design_clipart.push(item);
 }
 function listFonts() {
     var xml = "<request><sessionid>" + sessionid + "</sessionid></request>";
@@ -991,8 +1029,15 @@ $('body').on('click', '#colorpad a', function(event) {
     $('.colorlayer').find('a.active').css('background-color', $(this).css('background-color'));
     $('.colorlayer').find('a.active').css('background-image', '');
     isSelectedColor = true;
-    product.updateDesignColor(canvas.getActiveObject(),$('.colorlayer').find('a.active').attr('data-id'),$(this).css('background-color'));
-    
+    activeObj = canvas.getActiveObject();
+
+    if(activeObj.type =="image")
+    {
+     product.updateDesignColor(canvas.getActiveObject(),$('.colorlayer').find('a.active').attr('data-id'),$(this).css('background-color'));
+    }
+    else{
+     product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#fillcolor').css('background-color'),$('#strokecolor').css('background-color'));
+    }
     
 });
 // Select a pattern in pattern pad.
@@ -1000,8 +1045,14 @@ $('body').on('click', '#patternpad a', function(event) {
     $('.colorlayer').find('a.active').css('background-color', '');
     $('.colorlayer').find('a.active').css('background-image', $(this).css('background-image'));
     isSelectedColor = true;
-    product.updateDesignColor(canvas.getActiveObject(),$('.colorlayer').find('a.active').attr('data-id'),$(this).next().attr('id'));
-    
+    activeObj = canvas.getActiveObject();
+    if(activeObj.type =="image")
+    {
+     product.updateDesignColor(canvas.getActiveObject(),$('.colorlayer').find('a.active').attr('data-id'),$(this).next().attr('id'));
+    }
+    else{
+     product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#fillcolor').css('background-image'), $('#strokecolor').css('background-image'));
+    }
 });
 
 var ratio;
@@ -1464,12 +1515,6 @@ $(document).ready(function() {
     p_flag = 0;
     isaddtext = 0;
     $('.tab_custom').height($('.colortab_custom').height());
-    $('.tab_custom').css({
-        "padding-right":"0px",
-        "padding-left":"0px",
-        "overflow":"auto"
-    });
-
     var acc = document.getElementsByClassName("accordion");
     acc[0].classList.toggle("active");
     acc[0].nextElementSibling.classList.toggle("show");
