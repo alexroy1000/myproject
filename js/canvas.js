@@ -1,11 +1,214 @@
-﻿var sessionid;
-var fonts = [];
-var design_clipart = [];
-var design_text = [];
-var design_colors = [];
-var activeObj = null;
-var getBeforeObj = null;
+﻿function Product() {
+    this.ID = 0;
+    this.Name = "";
+    this.Design_List = [];
+}
 
+Product.prototype.addDesign_Object = function (Name, PreviewImage,placementID,item) {
+    var ID = product.Design_List.length;
+    var designobj = {
+                    ID:ID,
+                    Name:Name,
+                    previewImage:PreviewImage,
+                    placementID: placementID,
+                    shapes:[]
+                };
+    designobj.shapes.push(item);
+    return designobj;
+
+};// method define
+Product.prototype.getID = function(){
+    var id = 0;
+    if(product.Design_List.length>0)
+    {
+        for (var i = 0; i < product.Design_List.length; i++) {
+            id += product.Design_List[i].shapes.length;
+        }
+    }
+    return id;
+}
+Product.prototype.setSelectObj = function (item) {
+    activeObj = item;
+    if(item.objType == "image")
+    {
+        
+        var selectedObjId = item.id;
+        var ca = item.sevData;
+        var html = '';
+        $(".cliparteditor").show();
+        $(".texteditorext").hide();
+
+        if (removeobj == 0) {
+        $('.cliparteditor').show();
+            $(".colortab_custom").show();
+            $(".texteditor").hide();
+        }
+        removeobj = 0;
+        // Set value to html elements.
+
+        for (var i = 0; i < ca.CanvasObject.Colors.length; i ++) {
+            html += '<a class="btn btn-default colorpicker selectcolor" data-id="' + i 
+                 + '" style="background-color: ' 
+                 + ca.CanvasObject.Colors[i].HtmlColor 
+                 + '"></a>';
+        }
+
+       // console.log(selectedObj.getWidth());
+       // console.log(selectedObj.getHeight());
+
+        if(item.sizelock)
+        {
+            item.setControlsVisibility({'bl': false, 'br': false, 'mb': false, 'ml': false, 'mr': false, 'mt': false});
+            $('#clipart_width_text,  #clipart_width_range').prop('disabled', true);
+            $('#clipart_height_text, #clipart_height_range').prop('disabled', true);
+        }
+        else
+        {
+            item.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
+            $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
+            $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
+        }
+
+        $('.colorlayer').html(html);
+        $('#clipart_width_text,  #clipart_width_range').val( parseFloat(item.getWidth()) );
+        $('#clipart_height_text, #clipart_height_range').val( parseFloat(item.getHeight()) );
+        $('#clipart_angle_text,  #clipart_angle_range').val( item.getAngle());
+
+        $('#clipart_layer').find('li.active').removeClass('active');
+        $('#clipart_layer').find("[data-id='image_" + selectedObjId + "']").addClass('active');
+        // create design_colors array of selected clipart.
+
+        ratio = item.getWidth() / item.getHeight();
+
+        canvas.renderAll();
+    }
+    else if(item.objType == "text")
+    {
+         var selectedObjId = selectedObj.id;
+    console.log(selectedObjId);
+    $(".cliparteditor").hide();
+    $(".texteditor").show();
+    if (removeobj == 0) {
+        $(".colortab_custom").show();
+        if(isSelectClipObj == 0)
+        {
+            $(".texteditor").show();
+            $('.cliparteditor').hide();
+        }
+        else{
+            $(".texteditor").hide();
+            $('.cliparteditor').show();
+        }
+    }
+    removeobj = 0;
+    // Set value to html elements.
+        selectedObj.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
+        $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
+        $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
+    
+    // $('#clipart_size_text,  #clipart_size_range').val( parseFloat(selectedObj.getFontSize()) );
+    // $('#clipart_spacing_text, #clipart_spacing_range').val( parseFloat(selectedObj.spacing) );
+    $('#clipart_rotate_text,  #clipart_rotate_range').val( selectedObj.getAngle() );
+    // $('#clipart_arc_text,  #clipart_arc_range').val( selectedObj.radius );
+
+    $('#clipart_layer').find('li.active').removeClass('active');
+    $('#clipart_layer').find("[data-id='text_" + selectedObjId + "']").addClass('active');
+    $('#lock').attr('data-lock', 'false');
+    $('#lock').css('background-position', '0 -3650px');
+
+    selectedObj.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
+    $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
+    $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
+
+     var ca = design_clipart[selectedObjId];
+     var html = '';
+     html += '<a class="btn btn-default colorpicker selectcolor" data-id="0" style="background-color: ' 
+             + "red" 
+             + '"></a>';
+      $('.colorlayer').html(html);
+    }
+};
+Product.prototype.updateDesignColor = function (item,i,colorstr){
+
+    activeObj = item;
+    if (item == null ) {
+        alert('Please select a Object.');
+        return;
+    }
+    var ca = item.sevData;
+    var source;
+    var changeitem;
+    if(item.objType == "image")
+    {
+        ca.CanvasObject.Colors[i].HtmlColor = colorstr;
+        source = getCanvasObjects([ca.CanvasObject]);
+        changeitem = new fabric.Image(source, {        
+            left:   item.left,
+            top:    item.top,
+            width:  item.getWidth(),
+            height: item.getHeight(),
+            angle:  item.getAngle(),
+            sizelock : false,
+            originX: 'center',
+            originY: 'center',
+            name : ca.Name,
+            objID:ca.ID,
+            sevData:ca,
+            placementID : item.placementID
+        });  
+        changeitem.sizelock = ca.LockSize;
+    }
+    else if(item.objType == "text")
+    {
+        source = getCanvasObjects_font([ca.CanvasObject]);
+        changeitem = new fabric.Image(source, {        
+            left:   item.left,
+            top:    item.top,
+            width:  item.getWidth(),
+            height: item.getHeight(),
+            angle:  item.getAngle(),
+            originX: 'center',
+            originY: 'center'
+        });
+    }
+    console.log(item.left+"_"+item.top);
+    item.sizelock = ca.LockSize;
+    changeitem.set('id',item.id);
+    changeitem.set('objType', item.objType);
+    canvas.add(changeitem);
+    canvas.remove(item);
+    canvas.setActiveObject(changeitem);
+    for (var i =0 ; i<product.Design_List.length  ; i++) {     
+       if( product.Design_List[i].placementID == item.placementID)
+       {
+            //product.Design_List[i].shapes.push(item);
+            for (var j = 0; j < product.Design_List[i].shapes.length; j++) {
+                if(product.Design_List[i].shapes[j].id == changeitem.id)
+                {
+                    product.Design_List[i].shapes[j] = changeitem;
+                }
+            }
+            break;
+       }
+
+    }
+    var cid = changeitem.objType + '_' + changeitem.id; 
+    var mycanvas = document.getElementById(cid);
+    var myctx    = mycanvas.getContext('2d');
+    myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
+     
+};
+//Product.prototype.updateDesign_Object = function 
+function productDesigns() {
+    var obj = [];
+
+    return obj;
+}
+var product;
+var sessionid;
+var fonts = [];
+var getBeforeObj = null;
+var activeObj = null;
 var removeobj = 0;
 var isSelectedColor = false;
 var selectedColorlayer = 0;
@@ -44,11 +247,10 @@ function login() {
                 listClipArt();
                 getColorPalette();
                 listPlacement();
-
                 var mycanvas = document.getElementById('myCanvas');
                 var myctx = mycanvas.getContext('2d');
-                
                 drawGrid();
+                product = new Product();
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
@@ -316,23 +518,6 @@ function getCanvasObjects_font(data_array) {
 
     return (cTemp);
 }
-/*function getCharacters(fontid, characters) {
-    // console.log("getCharacters, FontID:" + fontid);
-    // console.log(fonts);
-    var cliparts = [];
-    for (var i = 0; i < characters.length; i ++) {
-        for (var j = 0; j < fonts[fontid].Characters.length; j++) {
-            var c = fonts[fontid].Characters[j];
-            if (c.Character == characters[i]) {
-                cliparts.push(c.CanvasObject);
-                // console.log("getCharacters, c.CanvasObject.ID:" + c.CanvasObject.ID);
-                break;
-            }
-        }
-    }
-        
-    return (getCanvasObjects(cliparts));
-}*/
 
 function getCharacters(fontid, characters) {
     var cliparts    = [];
@@ -340,7 +525,8 @@ function getCharacters(fontid, characters) {
     var stretch     = 1;
     var left        = canvas.width / 2;
     var height      = 0;
-    console.log(fonts[fontid]);
+    // console.log(fontid);
+    // console.log(fonts[fontid]);
     for (var i = 0; i < characters.length; i++) {
         for (var j = 0; j < fonts[fontid].Characters.length; j++) {
             var c = fonts[fontid].Characters[j];
@@ -355,11 +541,13 @@ function getCharacters(fontid, characters) {
                     top     : canvas.height / 2,
                     originX : 'left',
                     originY : 'bottom',
-                    // width: c.CanvasObject.Width
-                    // height: c.CanvasObject.Height
-                    // stroke: 'red',
-                    // strokeWidth: 10
-                    fill    : '#1c1a1c'
+                    width   : c.CanvasObject.Width,
+                    height  : c.CanvasObject.Height,
+                    // stroke  : '#1c1a1c',
+                    // strokeWidth: 5,
+                    fill    : '#1c1a1c',
+                    font    :  fontid,
+                    text    :  characters
                 }));
                 // console.log("getCharacters, c.CanvasObject.ID:" + c.CanvasObject.ID);
                 left += c.CanvasObject.Width + spacing;
@@ -425,13 +613,57 @@ function _render(source) {
     canvas.renderAll();
 }
 
-function drawCharacters(fontid, $that, x, y) {
+function drawCharacters(fontid, $that, x, y,placementID) {
+    var characters = $that.val();
+    if (characters.length == 0)
+    var id      = product.getID();
+    var item    = getCharacters(fontid, characters);
+    console.log(item);
+    item.set('id', id);
+    item.set('objType', 'text');
+    item.scale(0.1);
+    item.sizelock = false;
+    _render(item);
+    canvas.add(item);
+    activeObj = item;
+    if(product.Design_List.length>0)
+    {
+        for (var i =0 ; i<product.Design_List.length  ; i++) {
+            
+           if( product.Design_List[i].placementID == placementID)
+           {
+                product.Design_List[i].shapes.push(item);
+           }
+           else{
+                product.Design_List.push(product.addDesign_Object("","",placementID,item));
+            }
+        }
+    }
+    else{
+        product.Design_List.push(product.addDesign_Object("","",placementID,item));
+
+    }
+    console.log(product.Design_List[0].shapes);
+    canvas.setActiveObject(item);
+    // object layer
+    $('#clipart_layer').find('li.active').removeClass('active');
+    $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
+    $('#clipart_layer').find('#text_' + id).attr('src', item.toDataURL('png'));
+    // active clipart object.
+    selectTextObj(item);
+    design_clipart.push(item);
+}
+
+
+function updateCharacters(fontsid,$that, x,y )
+{
+    var selectedObj = canvas.getActiveObject();
     var characters = $that.val();
     if (characters.length == 0)
     return;
-    var id      = design_text.length;
+    var id      = design_clipart.length;
 
-    var item    = getCharacters(fontid, characters);
+    var item    = getCharacters(fontsid, characters);
     
     item.set('id', id);
     item.set('objType', 'text');
@@ -440,6 +672,7 @@ function drawCharacters(fontid, $that, x, y) {
     item.scale(0.1);
     item.sizelock = false;
     _render(item);
+    canvas.remove(selectedObj);
     canvas.add(item);
     
     // preview image
@@ -451,15 +684,8 @@ function drawCharacters(fontid, $that, x, y) {
     $('#clipart_layer').find('#text_' + id).attr('src', item.toDataURL('png'));
     // active clipart object.
     selectTextObj(item);
-    design_text.push(item);
+    design_clipart.push(item);
 }
-
-
-function updateCharacters(group, options)
-{
-
-}
-
 function listFonts() {
     var xml = "<request><sessionid>" + sessionid + "</sessionid></request>";
 
@@ -478,10 +704,6 @@ function listFonts() {
                 var data = eval(r.Data);
                 for (var i = 0; i < data.length; i++) {
                     var f = data[i];
-                    $('#ddlFonts').append($('<option>', {
-                        value: f.ID,
-                        text: f.Name
-                    }));
                     $('#dlFonts_form').append($('<option>', {
                         value: f.ID,
                         text: f.Name
@@ -510,13 +732,13 @@ function listClipArt() {
                 var data = eval(r.Data);
                 for (var i = 0; i < data.length; i++) {
                     var c = data[i];
-                    $('#ddlClipArt').append($('<option>', {
-                        value: c.ID,
-                        text: c.Name
-                    }));
                     $('#listClipArt').append($('<li>', {
                         id: c.ID,
-                        html: c.Name
+                        html: c.Name,
+                        "data-type":"image",
+                        "data-name":c.Name,
+                        "data-locksize":c.LockSize,
+
                     }));
                     
                 }
@@ -542,9 +764,7 @@ function listPlacement() {
                 var data = eval(r.Data);
                 for (var i = 0; i < data.length; i++) {
                     var p = data[i];
-                     // console.log(p);
-                     // console.log('[' + p.Width + ',' + p.Height + '] - ' + p.Overlap);
-                     $(".placement-modal .modal-body").append("<div style='float:left;'><IMG src='http://api.thetshirtguylv.com/image/placement/" + p.PreviewImage + "' data-width='"+p.Width+"' data-height='"+p.Height+"'/><br><p align='center'>" + p.Name + "</p></div>");
+                    $(".placement-modal .modal-body").append("<div style='float:left;'><IMG src='http://api.thetshirtguylv.com/image/placement/" + p.PreviewImage + "' data-width='"+p.Width+"' data-height='"+p.Height+"' data-name='"+p.Name+"' data-overlap='"+p.Overlap+"' data-id='"+p.ID+"'/><br><p align='center'>" + p.Name + "</p></div>");
                 }
             }
         }
@@ -584,7 +804,7 @@ function updateObjColor() {
     }
     else{
 
-        ca = design_text[selectedObjId];
+        ca = design_clipart[selectedObjId];
         source = getCanvasObjects_font([ca.CanvasObject]);
         item = new fabric.Image(getCanvasObjects_font([ca.CanvasObject]), {        
             left:   selectedObj.left,
@@ -620,7 +840,7 @@ function updateObjColor() {
     myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
 }
 
-function drawClipArt(clipartid, x, y) {
+function drawClipArt(clipartid, x, y, placementID) {
     var xml = "<request><sessionid>" + sessionid + "</sessionid><clipartid>" + clipartid + "</clipartid></request>";
     
     $.ajax({
@@ -637,10 +857,6 @@ function drawClipArt(clipartid, x, y) {
                 return;
             } else {
                 var ca = eval(r.Data)[0];
-
-                // console.log(ca);
-                // console.log(ca.LockSize);
-
                 design_colors = [];
                 for (var i = 0; i < ca.CanvasObject.Colors.length; i++) {
                     var isFound = false;
@@ -667,7 +883,7 @@ function drawClipArt(clipartid, x, y) {
                     }
                 }
 
-                var id = design_clipart.length; 
+                var id = product.getID(); 
                 var cid = 'image_' + id;
                 $('#clipart_layer').find('li.active').removeClass('active');
                 $('#clipart_layer').prepend('<li class="active" data-id="' + cid + '"><a data-href="#home"><canvas width="35" height="35" style="border-color:1px solid gray" id="' + cid + '"></canvas></a></li>');
@@ -686,37 +902,46 @@ function drawClipArt(clipartid, x, y) {
                 // console.log('source.width='+source.width+','+ 'source.height'+source.height+','+ 'positionX='+','+positionX +'positionY'+positionY+','+ 'newWidth'+newWidth+',' +'newHeight'+newHeight);
                 
                 var h = 200 * source.height / source.width;
-                
-                var item = new fabric.Image(source, {                     
+                var item = new fabric.Image(source, {
                     left: canvas.width /2,
                     top:  canvas.height/2,
                     width: 200,
                     height: h,
                     sizelock: 'false',
                     // opacity : 0.5
+                    placementID : placementID,
                     originX: 'center',
-                    originY: 'center'
+                    originY: 'center',
+                    name:ca.Name,
+                    objId:ca.ID,
+                    sevData:ca,
                 });
 
-                
                 item.sizelock = ca.LockSize;
-                
                 item.set('id', id);
                 item.set('objType', 'image');
-
                 canvas.add(item);
-                
                 canvas.setActiveObject(item);
                 activeObj = item;
-                
-                
-
-                ca.design_colors = design_colors;
-                design_clipart.push(ca);
-
+                if(product.Design_List.length>0)
+                {
+                    for (var i =0 ; i<product.Design_List.length  ; i++) {
+                        
+                       if( product.Design_List[i].placementID == placementID)
+                       {
+                            product.Design_List[i].shapes.push(item);
+                       }
+                       else{
+                            product.Design_List.push(product.addDesign_Object("","",placementID,item));
+                        }
+                    }
+                }
+                else{
+                    product.Design_List.push(product.addDesign_Object("","",placementID,item));
+ 
+                }
                 var html = '';
                 // Set values in html elements.
-
                 for (var i = 0; i < ca.CanvasObject.Colors.length; i ++) {
                     html += '<a class="btn btn-default colorpicker selectcolor" data-id="' + i 
                          + '" style="background-color: ' 
@@ -724,13 +949,10 @@ function drawClipArt(clipartid, x, y) {
                          + '"></a>';
                 }   
                 $('.colorlayer').html(html);
-
                 $('#clipart_width_text,  #clipart_width_range').val( parseFloat(item.getWidth()) );
                 $('#clipart_height_text, #clipart_height_range').val( parseFloat(item.getHeight()));
                 $('#clipart_angle_text,  #clipart_angle_range').val( item.getAngle());
-
-                // active clipart object.
-                selectClipartObj(item);
+                product.setSelectObj(item);
             }
         }
     });
@@ -897,209 +1119,37 @@ function getColorPalette() {
                 $('.cliparteditor #patternpad').html(stry);
                 $('.cliparteditor #colorx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + col_group_name);
                 $('.cliparteditor #patternx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + pattern_group_name);
-                $('.texteditor #textcolorpad').html(strx);
-                $('.texteditor #textpatternpad').html(stry);
-                $('.texteditor #textcolorx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + col_group_name);
-                $('.texteditor #textpatternx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + pattern_group_name);
+                $('.texteditor #colorpad').html(strx);
+                $('.texteditor #patternpad').html(stry);
+                $('.texteditor #colorx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + col_group_name);
+                $('.texteditor #patternx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + pattern_group_name);
             }
         }
     });
 }
-
-function colourNameToHex(colour) {
-    var colours = {"aliceblue":"#f0f8ff","antiquewhite":"#faebd7","aqua":"#00ffff","aquamarine":"#7fffd4","azure":"#f0ffff",
-    "beige":"#f5f5dc","bisque":"#ffe4c4","black":"#000000","blanchedalmond":"#ffebcd","blue":"#0000ff","blueviolet":"#8a2be2","brown":"#a52a2a","burlywood":"#deb887",
-    "cadetblue":"#5f9ea0","chartreuse":"#7fff00","chocolate":"#d2691e","coral":"#ff7f50","cornflowerblue":"#6495ed","cornsilk":"#fff8dc","crimson":"#dc143c","cyan":"#00ffff",
-    "darkblue":"#00008b","darkcyan":"#008b8b","darkgoldenrod":"#b8860b","darkgray":"#a9a9a9","darkgreen":"#006400","darkkhaki":"#bdb76b","darkmagenta":"#8b008b","darkolivegreen":"#556b2f",
-    "darkorange":"#ff8c00","darkorchid":"#9932cc","darkred":"#8b0000","darksalmon":"#e9967a","darkseagreen":"#8fbc8f","darkslateblue":"#483d8b","darkslategray":"#2f4f4f","darkturquoise":"#00ced1",
-    "darkviolet":"#9400d3","deeppink":"#ff1493","deepskyblue":"#00bfff","dimgray":"#696969","dodgerblue":"#1e90ff",
-    "firebrick":"#b22222","floralwhite":"#fffaf0","forestgreen":"#228b22","fuchsia":"#ff00ff",
-    "gainsboro":"#dcdcdc","ghostwhite":"#f8f8ff","gold":"#ffd700","goldenrod":"#daa520","gray":"#808080","green":"#008000","greenyellow":"#adff2f",
-    "honeydew":"#f0fff0","hotpink":"#ff69b4",
-    "indianred ":"#cd5c5c","indigo":"#4b0082","ivory":"#fffff0","khaki":"#f0e68c",
-    "lavender":"#e6e6fa","lavenderblush":"#fff0f5","lawngreen":"#7cfc00","lemonchiffon":"#fffacd","lightblue":"#add8e6","lightcoral":"#f08080","lightcyan":"#e0ffff","lightgoldenrodyellow":"#fafad2",
-    "lightgrey":"#d3d3d3","lightgreen":"#90ee90","lightpink":"#ffb6c1","lightsalmon":"#ffa07a","lightseagreen":"#20b2aa","lightskyblue":"#87cefa","lightslategray":"#778899","lightsteelblue":"#b0c4de",
-    "lightyellow":"#ffffe0","lime":"#00ff00","limegreen":"#32cd32","linen":"#faf0e6",
-    "magenta":"#ff00ff","maroon":"#800000","mediumaquamarine":"#66cdaa","mediumblue":"#0000cd","mediumorchid":"#ba55d3","mediumpurple":"#9370d8","mediumseagreen":"#3cb371","mediumslateblue":"#7b68ee",
-    "mediumspringgreen":"#00fa9a","mediumturquoise":"#48d1cc","mediumvioletred":"#c71585","midnightblue":"#191970","mintcream":"#f5fffa","mistyrose":"#ffe4e1","moccasin":"#ffe4b5",
-    "navajowhite":"#ffdead","navy":"#000080",
-    "oldlace":"#fdf5e6","olive":"#808000","olivedrab":"#6b8e23","orange":"#ffa500","orangered":"#ff4500","orchid":"#da70d6",
-    "palegoldenrod":"#eee8aa","palegreen":"#98fb98","paleturquoise":"#afeeee","palevioletred":"#d87093","papayawhip":"#ffefd5","peachpuff":"#ffdab9","peru":"#cd853f","pink":"#ffc0cb","plum":"#dda0dd","powderblue":"#b0e0e6","purple":"#800080",
-    "rebeccapurple":"#663399","red":"#ff0000","rosybrown":"#bc8f8f","royalblue":"#4169e1",
-    "saddlebrown":"#8b4513","salmon":"#fa8072","sandybrown":"#f4a460","seagreen":"#2e8b57","seashell":"#fff5ee","sienna":"#a0522d","silver":"#c0c0c0","skyblue":"#87ceeb","slateblue":"#6a5acd","slategray":"#708090","snow":"#fffafa","springgreen":"#00ff7f","steelblue":"#4682b4",
-    "tan":"#d2b48c","teal":"#008080","thistle":"#d8bfd8","tomato":"#ff6347","turquoise":"#40e0d0",
-    "violet":"#ee82ee",
-    "wheat":"#f5deb3","white":"#ffffff","whitesmoke":"#f5f5f5",
-    "yellow":"#ffff00","yellowgreen":"#9acd32"};
-
-    if (typeof colours[colour.toLowerCase()] != 'undefined')
-        return colours[colour.toLowerCase()];
-
-    return false;
-}
-
-// When select a text object, add it on clipart layer and make to active its state.
-function selectTextObj(selectedObj) {
-
-    var selectedObjId = selectedObj.id;
-    $(".cliparteditor").hide();
-    $(".texteditor").show();
-    if (removeobj == 0) {
-        $(".colortab_custom").show();
-        if(isSelectClipObj == 0)
-        {
-            $(".texteditor").show();
-            $('.cliparteditor').hide();
-        }
-        else{
-            $(".texteditor").hide();
-            $('.cliparteditor').show();
-        }
-    }
-    removeobj = 0;
-    // Set value to html elements.
-
-    activeObj = selectedObj;
-        selectedObj.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
-        $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
-        $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
-    
-    // $('#clipart_size_text,  #clipart_size_range').val( parseFloat(selectedObj.getFontSize()) );
-    // $('#clipart_spacing_text, #clipart_spacing_range').val( parseFloat(selectedObj.spacing) );
-    $('#clipart_rotate_text,  #clipart_rotate_range').val( selectedObj.getAngle() );
-    // $('#clipart_arc_text,  #clipart_arc_range').val( selectedObj.radius );
-
-    $('#clipart_layer').find('li.active').removeClass('active');
-    $('#clipart_layer').find("[data-id='text_" + selectedObjId + "']").addClass('active');
-    $('#lock').attr('data-lock', 'false');
-    $('#lock').css('background-position', '0 -3650px');
-
-    selectedObj.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
-    $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
-    $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
-
-     var ca = design_text[selectedObjId];
-     var html = '';
-     html += '<a class="btn btn-default colorpicker selectcolor" data-id="0" style="background-color: ' 
-             + ca.HtmlColor 
-             + '"></a>';
-      $('.colorlayer').html(html);       
-}
-
-function selectClipartObj(selectedObj) {
-    
-    var selectedObjId = selectedObj.id;
-    var ca = design_clipart[selectedObjId];
-    var html = '';
-    $(".cliparteditor").show();
-    $(".texteditorext").hide();
-
-    if (removeobj == 0) {
-	$('.cliparteditor').show();
-        $(".colortab_custom").show();
-        $(".texteditor").hide();
-    }
-    removeobj = 0;
-    // Set value to html elements.
-
-    for (var i = 0; i < ca.CanvasObject.Colors.length; i ++) {
-        html += '<a class="btn btn-default colorpicker selectcolor" data-id="' + i 
-             + '" style="background-color: ' 
-             + ca.CanvasObject.Colors[i].HtmlColor 
-             + '"></a>';
-    }
-
-   // console.log(selectedObj.getWidth());
-   // console.log(selectedObj.getHeight());
-
-    if(selectedObj.sizelock)
-    {
-        selectedObj.setControlsVisibility({'bl': false, 'br': false, 'mb': false, 'ml': false, 'mr': false, 'mt': false});
-        $('#clipart_width_text,  #clipart_width_range').prop('disabled', true);
-        $('#clipart_height_text, #clipart_height_range').prop('disabled', true);
-    }
-    else
-    {
-        selectedObj.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
-        $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
-        $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
-    }
-
-    $('.colorlayer').html(html);
-    $('#clipart_width_text,  #clipart_width_range').val( parseFloat(selectedObj.getWidth()) );
-    $('#clipart_height_text, #clipart_height_range').val( parseFloat(selectedObj.getHeight()) );
-    $('#clipart_angle_text,  #clipart_angle_range').val( selectedObj.getAngle());
-
-    $('#clipart_layer').find('li.active').removeClass('active');
-    $('#clipart_layer').find("[data-id='image_" + selectedObjId + "']").addClass('active');
-    // create design_colors array of selected clipart.
-
-    ratio = selectedObj.getWidth() / selectedObj.getHeight();
-
-    canvas.renderAll();
-}
-
 // Select a color layer.
 
 $('body').on('click', '.colorlayer a', function(event) {
-    selectedColorlayer = $(this).attr('data-id'); 
+    $('.colorlayer').find('a.active').removeClass('active');
+    $(this).addClass('active');
 });
 
 // Select a color in color pad.
 $('body').on('click', '#colorpad a', function(event) {
-    
-    if (activeObj.objType == 'image') {
-        if (design_clipart[activeObj.id].design_colors.length <= selectedColorlayer) {
-            selectedColorlayer = 0;
-        }
-        design_clipart[activeObj.id].design_colors[selectedColorlayer].HtmlColor = $(this).css('background-color');
-        design_colors = design_clipart[activeObj.id].design_colors;
-    } else {
-        design_text[activeObj.id].HtmlColor = $(this).css('background-color');
-        selectedColorlayer = 0;
-    }
-
-    $('.colorlayer').children().eq(selectedColorlayer).css('background-color', $(this).css('background-color'));
-    $('.colorlayer').children().eq(selectedColorlayer).css('background-image', '');
+    $('.colorlayer').find('a.active').css('background-color', $(this).css('background-color'));
+    $('.colorlayer').find('a.active').css('background-image', '');
     isSelectedColor = true;
-
-    updateObjColor();
+    product.updateDesignColor(canvas.getActiveObject(),$('.colorlayer').find('a.active').attr('data-id'),$(this).css('background-color'));
+    
     
 });
 // Select a pattern in pattern pad.
 $('body').on('click', '#patternpad a', function(event) {
+    $('.colorlayer').find('a.active').css('background-color', '');
+    $('.colorlayer').find('a.active').css('background-image', $(this).css('background-image'));
     isSelectedColor = true;
-
-    if (activeObj.objType == 'image') {
-        if (design_clipart[activeObj.id].design_colors.length <= selectedColorlayer) {
-            selectedColorlayer = 0;
-        }
-        design_clipart[activeObj.id].design_colors[selectedColorlayer].HtmlColor = $(this).css('background-color');
-        design_colors = design_clipart[activeObj.id].design_colors;
-    } else {
-        design_text[activeObj.id].HtmlColor = $(this).css('background-color');
-        selectedColorlayer = 0;
-    }
-
-    design_clipart[activeObj.id].design_colors[selectedColorlayer].HtmlColor = $(this).next().attr('id');
-    $('.colorlayer').children().eq(selectedColorlayer).css('background-color', '');
-    $('.colorlayer').children().eq(selectedColorlayer).css('background-image', $(this).css('background-image'));
+    product.updateDesignColor(canvas.getActiveObject(),$('.colorlayer').find('a.active').attr('data-id'),$(this).next().attr('id'));
     
-    design_colors = design_clipart[activeObj.id].design_colors;
-
-    updateObjColor();    
-    // } else {
-    //     $('.colorlayer').children().eq(0).css('background-color', '');
-    //     $('.colorlayer').children().eq(0).css('background-image', $(this).css('background-image'));
-
-    //     fabric.util.loadImage($(this).next().attr('src'), function(img) {
-    //         activeObj.fill = new fabric.Pattern({
-    //             source: img,
-    //             repeat: 'repeat'
-    //         });
-    //         canvas.renderAll();
-    //     });
-    // }
 });
 
 var ratio;
@@ -1315,18 +1365,20 @@ $('.layer_up').click(function(event) {
     var selectedObj = canvas.getActiveObject();
     if (selectedObj == null) 
         return;
-
-    canvas.bringToFront(selectedObj);
+    if (selectedObj) {
+              selectedObj.bringToFront();
+            }
+    //selectedObj.bringToFront();
     
     // Update object tab
     var id      = selectedObj.id;
-if(activeObj.objType == "image")
+if(selectedObj.objType == "image")
     {
-        var selLi   = $('#clipart_layer').find("[data-id='image_" + activeObj.id + "']");    
+        var selLi   = $('#clipart_layer').find("[data-id='image_" + selectedObj.id + "']");    
     }
     else
     {
-        var selLi   = $('#clipart_layer').find("[data-id='text_" + activeObj.id + "']");       
+        var selLi   = $('#clipart_layer').find("[data-id='text_" + selectedObj.id + "']");       
     }
     var prev    = selLi.prev();
     prev.before(selLi);
@@ -1340,17 +1392,18 @@ $('.layer_down').click(function(event) {
     
     if ($('#clipart_layer li:last-child').attr('data-id') == selectedObj.id)
         return;
-
-    canvas.sendBackwards(selectedObj);
+    if (selectedObj) {
+        selectedObj.sendToBack();
+    }
 
     var id      = selectedObj.id;
-    if(activeObj.objType == "image")
+    if(selectedObj.objType == "image")
     {
-        var selLi   = $('#clipart_layer').find("[data-id='image_" + activeObj.id + "']");    
+        var selLi   = $('#clipart_layer').find("[data-id='image_" + selectedObj.id + "']");    
     }
     else
     {
-        var selLi   = $('#clipart_layer').find("[data-id='text_" + activeObj.id + "']");       
+        var selLi   = $('#clipart_layer').find("[data-id='text_" + selectedObj.id + "']");       
     }
     var next    = selLi.next();
     next.after(selLi);
@@ -1384,47 +1437,47 @@ $('body').on('click', '#clipart_layer li', function(e) {
     var res = data_id.split("_");
     var type = res[0];
     var id = res[1];
-
-    console.log(type);
-    console.log(id);
-
     $('#clipart_layer').find('li.active').removeClass('active');
     $('#clipart_layer').find("[data-id='" + data_id + "']").addClass('active');
-    
     for (var i = 0; i < canvas.getObjects().length; i ++) {
         if (canvas.item(i).id == id && canvas.item(i).objType == type) {
             canvas.setActiveObject(canvas.item(i));
-            if(type == 'image')
-                selectClipartObj(canvas.item(i));
-            else
-                selectTextObj(canvas.item(i));
-
+            product.setSelectObj(canvas.item(i));
             return;        
         }
     }
 
 });
-
-var _placement = '';
-var place_w = 0;
-var place_h = 0;
+var newplacement = null;
 $('.placement-modal .modal-body').on('click', 'div',function () {
-    
+    // var placement_list = [];
+    // if(product.Designs.placement.length>0)
+    // {
+        
+    // }
+    // else{
+
+    // }
+    console.log(product.Designs.placement);
     $('.placement-modal .modal-body').find('.active').removeClass('active');
-    // $(this).css('border', '1px solid red');
     $(this).addClass('active');
-    _placement = $(this).children('img').attr('src');
-    place_w = $(this).children('img').attr('data-width');
-    place_h = $(this).children('img').attr('data-height');
+    newplacement = $(this);
+
 })
 
 $('#select_placement').click(function(event) {
-    if (_placement != '') {
-        $('#placement').attr('src', _placement);
-
-        $('.placement-modal .close').click();
-        drawGrayGrid(place_w,place_h);
+    var click_product = {
+        ID : newplacement.children('img').attr('data-id'),
+        Name : newplacement.children('img').attr('data-name'),
+        Overlap : newplacement.children('img').attr('data-overlap'),
+        Width : newplacement.children('img').attr('data-width'),
+        Height : newplacement.children('img').attr('data-height'),
+        PreviewImage : newplacement.children('img').attr('src')
     }
+    product.Designs.placement.push(click_product);
+    $('#placement').attr('src', newplacement.children('img').attr('src'));
+    $('.placement-modal .close').click();
+    drawGrayGrid(newplacement.children('img').attr('data-width'),newplacement.children('img').attr('data-height'));
 });
 
 function updateControls() {
@@ -1459,15 +1512,9 @@ canvas.on({
     "mouse:down":   function (e) {
                         var selectedObj = canvas.getActiveObject();
                         if (selectedObj == null) 
-                            return;                       
-
-                        activeObj = selectedObj;
-
-                        if (activeObj.objType == 'image') {                            
-                            selectClipartObj(selectedObj);    
-                        } else if(activeObj.objType == 'text') {
-                            selectTextObj(selectedObj);
-                        }
+                        return; 
+                        activeObj = selectedObj;      
+                        product.setSelectObj(selectedObj);
                     },
     "mouse:move":   function(e){
 
@@ -1548,7 +1595,7 @@ $('#gotext').click(function(){
     $('.edittextbox').hide();
     $('#tbx').val($('#tbxbefore').val());
     $('.texteditor').show();
-    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);
+    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2,1);
     
     $('cliparteditor').hide();
 });
@@ -1579,39 +1626,13 @@ $(document).ready(function() {
 // $('.accordion').click(function(e){
 //     $('.tab_custom').height($('.colortab_custom').height());
 // });
-$('#add').click(function(event) {
-    drawClipArt($('#ddlClipArt').val(), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);
-});
 $('body').on('click','#listClipArt li',function(event) { 
     //console.log($(this).html());
-    drawClipArt($(this).attr('id'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);
+    drawClipArt($(this).attr('id'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2,1);
 });
-
-
-// When click a 'Add text' button, draw text.
-$('#add_text').click(function(event) {
-    
-        
-    //drawCharacters($('#ddlFonts').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);
-    
-});
-// $('body').on('click','#addText',function(event) {
-    
-//        if(isaddtext ==0)
-//        {
-
-//             $('.texteditor').show();
-//             $('.cliparteditor').hide();
-//             isaddtext = 1;
-//        }
-//        // else if(isaddtext ==1)
-//        // {
-//        //      drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);
-//        // }  
-// });
 $('#dlFonts_form').change(function(){
         //   drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);        
-    if(activeObj.objType == "text")
+    if(canvas.getActiveObject().objType == "text")
     {
         //drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);   
         updateCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);
@@ -1628,12 +1649,6 @@ $('body').on('click','.closebtn',function(e) {
     $('.secondp').hide();
     $('.firstp').show();
 });
-
-$(window).resize(function() {
-    // console.log(window.devicePixelRatio);
-    // $('#myCanvas').width(($('#myCanvas').width())/window.devicePixelRatio);
-});
-
 var acc = document.getElementsByClassName("accordion");
 var i;
 
