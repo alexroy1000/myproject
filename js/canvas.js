@@ -4,6 +4,7 @@
     this.Design_List = [];
 }
 
+
 Product.prototype.addDesign_Object = function (Name, PreviewImage,placementID,item) {
     var ID = product.Design_List.length;
     var designobj = {
@@ -16,7 +17,7 @@ Product.prototype.addDesign_Object = function (Name, PreviewImage,placementID,it
     designobj.shapes.push(item);
     return designobj;
 
-};// method define
+};
 Product.prototype.getID = function(){
     var id = 0;
     if(product.Design_List.length>0)
@@ -29,11 +30,10 @@ Product.prototype.getID = function(){
 }
 Product.prototype.setSelectObj = function (item) {
     activeObj = item;
+    var selectedObjId = item.id;
+    var ca = item.sevData;
     if(item.objType == "image")
     {
-        
-        var selectedObjId = item.id;
-        var ca = item.sevData;
         var html = '';
         $(".cliparteditor").show();
         $(".texteditorext").hide();
@@ -52,9 +52,6 @@ Product.prototype.setSelectObj = function (item) {
                  + ca.CanvasObject.Colors[i].HtmlColor 
                  + '"></a>';
         }
-
-       // console.log(selectedObj.getWidth());
-       // console.log(selectedObj.getHeight());
 
         if(item.sizelock)
         {
@@ -84,8 +81,6 @@ Product.prototype.setSelectObj = function (item) {
     }
     else if(item.objType == "text")
     {
-         var selectedObjId = selectedObj.id;
-    console.log(selectedObjId);
     $(".cliparteditor").hide();
     $(".texteditor").show();
     if (removeobj == 0) {
@@ -102,13 +97,13 @@ Product.prototype.setSelectObj = function (item) {
     }
     removeobj = 0;
     // Set value to html elements.
-        selectedObj.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
+        item.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
         $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
         $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
     
     // $('#clipart_size_text,  #clipart_size_range').val( parseFloat(selectedObj.getFontSize()) );
     // $('#clipart_spacing_text, #clipart_spacing_range').val( parseFloat(selectedObj.spacing) );
-    $('#clipart_rotate_text,  #clipart_rotate_range').val( selectedObj.getAngle() );
+    $('#clipart_rotate_text,  #clipart_rotate_range').val( item.getAngle() );
     // $('#clipart_arc_text,  #clipart_arc_range').val( selectedObj.radius );
 
     $('#clipart_layer').find('li.active').removeClass('active');
@@ -116,11 +111,10 @@ Product.prototype.setSelectObj = function (item) {
     $('#lock').attr('data-lock', 'false');
     $('#lock').css('background-position', '0 -3650px');
 
-    selectedObj.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
+    item.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
     $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
     $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
 
-     var ca = design_clipart[selectedObjId];
      var html = '';
      html += '<a class="btn btn-default colorpicker selectcolor" data-id="0" style="background-color: ' 
              + "red" 
@@ -141,7 +135,7 @@ Product.prototype.updateDesignColor = function (item,i,colorstr){
     if(item.objType == "image")
     {
         ca.CanvasObject.Colors[i].HtmlColor = colorstr;
-        source = getCanvasObjects([ca.CanvasObject]);
+        source = getCanvasObjects([ca.CanvasObject],item.objType);
         changeitem = new fabric.Image(source, {        
             left:   item.left,
             top:    item.top,
@@ -160,7 +154,7 @@ Product.prototype.updateDesignColor = function (item,i,colorstr){
     }
     else if(item.objType == "text")
     {
-        source = getCanvasObjects_font([ca.CanvasObject]);
+        source = getCanvasObjects([ca.CanvasObject],item.objType);
         changeitem = new fabric.Image(source, {        
             left:   item.left,
             top:    item.top,
@@ -198,22 +192,13 @@ Product.prototype.updateDesignColor = function (item,i,colorstr){
     myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
      
 };
-//Product.prototype.updateDesign_Object = function 
-function productDesigns() {
-    var obj = [];
-
-    return obj;
-}
 var product;
 var sessionid;
 var fonts = [];
-var getBeforeObj = null;
 var activeObj = null;
 var removeobj = 0;
 var isSelectedColor = false;
-var selectedColorlayer = 0;
 var isSelectClipObj = 0;
-var placementObj = null;
 var graytlx = 0;
 var graytly = 0;
 var graywidth = 0;
@@ -282,7 +267,7 @@ function getFont(fontid) {
 }
 
 // Convert from data array to canvas object.
-function getCanvasObjects(data_array) {
+function getCanvasObjects(data_array,objtype) {
     var log     = false;
     var width   = 0;
     var height  = 0;
@@ -302,148 +287,20 @@ function getCanvasObjects(data_array) {
         width += c.Width;
         width += gap;
     }
-
     width -= gap;
-   
-    height = c.Height;   
-
+    if(objtype=="image")
+    {
+        height = c.Height;
     y = c.Height / 2;
-   
-    
-    
-
-    // If data is clipart, y equal height / 2. If data is text, y equals height.
-    // if (data_array.length == 1) {
-        // y = height / 2;    
-    // } else {
-        
-        
-        // height = 1100;
-    // }
-    
-
-    // console.log(data_array);
-    var cTemp = document.createElement('canvas');
-
-    cTemp.width  = width;
-    cTemp.height = height;
-    var ctx = cTemp.getContext('2d');
-    for (var da = 0; da < data_array.length; da++) {
-        var data = data_array[da];
-        for (var i = 0; i < data.Groups.length; i++) {
-            var g = data.Groups[i];
-            for (var j = 0; j < g.Paths.length; j++) {
-                var p = g.Paths[j];
-                var a = eval(p.Command);
-                if (log) console.log(p.Command);
-                switch (a[0]) {
-                    case 'BP':
-                        ctx.beginPath();
-                        if (log) console.log('ctx.beginPath();');
-                        break;
-                    case 'MT':
-                        ctx.moveTo((x + a[1]), (y + a[2]));
-                        if (log) console.log('ctx.moveTo(' + (x + a[1]) + ',' + (y + a[2]) + ');');
-                        break;
-                    case 'LT':
-                        ctx.lineTo((x + a[1]), (y + a[2]));
-                        if (log) console.log('ctx.lineTo(' + (x + a[1]) + ',' + (y + a[2]) + ');');
-                        break;
-                    case 'BCT':
-                        ctx.bezierCurveTo((x + a[1]), (y + a[2]), (x + a[3]), (y + a[4]), (x + a[5]), (y + a[6]));
-                        if (log) console.log('ctx.bezierCurveTo(' + (x + a[1]) + ',' + (y + a[2]) + ',' + (x + a[3]) + ',' + (y + a[4]) + ',' + (x + a[5]) + ',' + (y + a[6]) + ');');
-                        break;
-                    case 'CP':
-                        ctx.closePath();
-                        if (log) console.log('ctx.closePath();');
-                        break;
-                }
-            }
-
-            if (g.Fill !== undefined) {
-                // console.log(g.Fill);
-                // console.log(g.Fill.HtmlColor);
-
-                if ( g.Fill.HtmlColor.indexOf('img_pattern') != -1) {
-                    var image = document.getElementById(g.Fill.HtmlColor);
-                    ctx.fillStyle = ctx.createPattern(image, "repeat");
-                } else { 
-                    ctx.fillStyle = g.Fill.HtmlColor.replace(new RegExp("'", 'g'), "");
-                }
-
-                ctx.mozFillRule = 'evenodd';
-                ctx.fill('evenodd');
-                if (log) {
-                    console.log('ctx.fillStyle = ' + g.Fill.HtmlColor + ';');
-                    console.log('ctx.mozFillRule = \'evenodd\';');
-                    console.log('ctx.fill(\'evenodd\');');
-                }
-            }
-
-            if (g.Stroke != undefined) {
-                ctx.strokeStyle = g.Stroke.HtmlColor;
-                ctx.lineWidth   = g.StrokeWidth;
-                ctx.stroke();
-                if (log) {
-                    console.log('ctx.strokeStyle = ' + g.Stroke.HtmlColor + ';');
-                    console.log('ctx.lineWidth = '   + g.StrokeWidth      + ';');
-                    console.log('ctx.stroke();');
-                }
-            }
-        }
-        x += ((data.Width / 2) + gap);
-        if (da + 1 < data_array.length)
-            x += (data_array[da + 1].Width / 2);
     }
-
-    return (cTemp);
-}
-
-
-function getCanvasObjects_font(data_array) {
-    var log     = false;
-    var width   = 0;
-    var height  = 0;
-    var gap     = 10;
-    var x       = 0;
-    var y       = 0;
-    var baseline = 0;
-    
-    for (var i = 0; i < data_array.length; i++) {
-        var c = data_array[i];
-        if (x == 0) {
-            x = c.Width / 2;
-        }
-        if (c.Height > height) {
-            height = c.Height;
-        }
-        width += c.Width;
-        width += gap;
-    }
-    width -= gap;
-    
+    else if(objtype=="text")
+    {
         height = c.Height + 200;
-
         y = c.Height;
+    }
+      
     
-    
-    
-
-    // If data is clipart, y equal height / 2. If data is text, y equals height.
-    // if (data_array.length == 1) {
-        // y = height / 2;    
-    // } else {
-        
-        
-        // height = 1100;
-    // }
-    
-
-    // console.log(data_array);
     var cTemp = document.createElement('canvas');
-
-
-
     cTemp.width  = width;
     cTemp.height = height;
     var ctx = cTemp.getContext('2d');
@@ -480,9 +337,6 @@ function getCanvasObjects_font(data_array) {
             }
 
             if (g.Fill !== undefined) {
-                // console.log(g.Fill);
-                // console.log(g.Fill.HtmlColor);
-
                 if ( g.Fill.HtmlColor.indexOf('img_pattern') != -1) {
                     var image = document.getElementById(g.Fill.HtmlColor);
                     ctx.fillStyle = ctx.createPattern(image, "repeat");
@@ -515,11 +369,10 @@ function getCanvasObjects_font(data_array) {
             x += (data_array[da + 1].Width / 2);
     }
 
-
     return (cTemp);
 }
 
-function getCharacters(fontid, characters) {
+function getCharacters(fontid, characters) {476
     var cliparts    = [];
     var spacing     = 0;
     var stretch     = 1;
@@ -529,14 +382,16 @@ function getCharacters(fontid, characters) {
     // console.log(fonts[fontid]);
     for (var i = 0; i < characters.length; i++) {
         for (var j = 0; j < fonts[fontid].Characters.length; j++) {
+
             var c = fonts[fontid].Characters[j];
+            console.log(c);
             if (c.Character == characters[i]) {
                 // console.log(c.Character + ':' + c.CanvasObject.Height)
                 if (c.CanvasObject.Height > height) {
                     height = c.CanvasObject.Height;
                 }
 
-                cliparts.push(new fabric.Image(getCanvasObjects_font([c.CanvasObject]), {                   
+                cliparts.push(new fabric.Image(getCanvasObjects([c.CanvasObject],"text"), {                   
                     left    : left,
                     top     : canvas.height / 2,
                     originX : 'left',
@@ -613,11 +468,12 @@ function _render(source) {
     canvas.renderAll();
 }
 
-function drawCharacters(fontid, $that, x, y,placementID) {
+function drawCharacters(fontid, $that, x, y,colorstr,placementID) {
     var characters = $that.val();
     if (characters.length == 0)
+    return;
     var id      = product.getID();
-    var item    = getCharacters(fontid, characters);
+    var item    = getCharacters(fontid, characters, colorstr,colorstr);
     console.log(item);
     item.set('id', id);
     item.set('objType', 'text');
@@ -643,15 +499,12 @@ function drawCharacters(fontid, $that, x, y,placementID) {
         product.Design_List.push(product.addDesign_Object("","",placementID,item));
 
     }
-    console.log(product.Design_List[0].shapes);
     canvas.setActiveObject(item);
     // object layer
     $('#clipart_layer').find('li.active').removeClass('active');
     $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
-    $('#clipart_layer').find('#text_' + id).attr('src', item.toDataURL('png'));
-    // active clipart object.
-    selectTextObj(item);
-    design_clipart.push(item);
+	$('#clipart_layer').find('#text_' + id).attr('src', item.toDataURL('png'));
+    product.setSelectObj(item);
 }
 
 
@@ -681,7 +534,6 @@ function updateCharacters(fontsid,$that, x,y )
     // object layer
     $('#clipart_layer').find('li.active').removeClass('active');
     $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
-    $('#clipart_layer').find('#text_' + id).attr('src', item.toDataURL('png'));
     // active clipart object.
     selectTextObj(item);
     design_clipart.push(item);
@@ -789,9 +641,9 @@ function updateObjColor() {
 
     if(selectedObjType == 'image') {
         ca = design_clipart[selectedObjId];   
-        source = getCanvasObjects([ca.CanvasObject]);
+        source = getCanvasObjects([ca.CanvasObject],selectedObjType);
          // Add mix colored Object.
-        item = new fabric.Image(getCanvasObjects([ca.CanvasObject]), {        
+        item = new fabric.Image(source, {        
             left:   selectedObj.left,
             top:    selectedObj.top,
             width:  selectedObj.getWidth(),
@@ -805,8 +657,8 @@ function updateObjColor() {
     else{
 
         ca = design_clipart[selectedObjId];
-        source = getCanvasObjects_font([ca.CanvasObject]);
-        item = new fabric.Image(getCanvasObjects_font([ca.CanvasObject]), {        
+        source = getCanvasObjects([ca.CanvasObject],selectedObjType);
+        item = new fabric.Image(source, {        
             left:   selectedObj.left,
             top:    selectedObj.top,
             width:  selectedObj.getWidth(),
@@ -888,7 +740,7 @@ function drawClipArt(clipartid, x, y, placementID) {
                 $('#clipart_layer').find('li.active').removeClass('active');
                 $('#clipart_layer').prepend('<li class="active" data-id="' + cid + '"><a data-href="#home"><canvas width="35" height="35" style="border-color:1px solid gray" id="' + cid + '"></canvas></a></li>');
                 
-                var source   = getCanvasObjects([ca.CanvasObject]);
+                var source   = getCanvasObjects([ca.CanvasObject],"image");
                 var mycanvas = document.getElementById(cid);
                 var myctx    = mycanvas.getContext('2d');
 
@@ -1595,7 +1447,7 @@ $('#gotext').click(function(){
     $('.edittextbox').hide();
     $('#tbx').val($('#tbxbefore').val());
     $('.texteditor').show();
-    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2,1);
+    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2,"#1c1a1c",1);
     
     $('cliparteditor').hide();
 });
