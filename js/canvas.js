@@ -122,20 +122,15 @@ Product.prototype.setSelectObj = function (item) {
      //  $('.colorlayer').html(html);
     }
 };
-Product.prototype.updateDesignColor = function (item,i,colorstr){
-
-    activeObj = item;
+Product.prototype.updateImageDesign = function (item,i,colorstr){
     if (item == null ) {
         alert('Please select a Object.');
         return;
     }
-    console.log(colorstr);
-    var ca;
-    var source;
-    var changeitem;  ca = item.sevData;
-        ca.CanvasObject.Colors[i].HtmlColor = colorstr;
-        source = getCanvasObjects([ca.CanvasObject],item.objType);
-        changeitem = new fabric.Image(source, {        
+    var  ca = item.sevData;
+    ca.CanvasObject.Colors[i].HtmlColor = colorstr;
+    var   source = getCanvasObjects([ca.CanvasObject],item.objType);
+    var   changeitem = new fabric.Image(source, {        
             left:   item.left,
             top:    item.top,
             width:  item.getWidth(),
@@ -149,9 +144,7 @@ Product.prototype.updateDesignColor = function (item,i,colorstr){
             sevData:ca,
             placementID : item.placementID
         });  
-        changeitem.sizelock = ca.LockSize;
-    
-    console.log(item.left+"_"+item.top);
+    changeitem.sizelock = ca.LockSize;
     item.sizelock = ca.LockSize;
     changeitem.set('id',item.id);
     changeitem.set('objType', item.objType);
@@ -161,7 +154,7 @@ Product.prototype.updateDesignColor = function (item,i,colorstr){
     for (var i =0 ; i<product.Design_List.length  ; i++) {     
        if( product.Design_List[i].placementID == item.placementID)
        {
-            //product.Design_List[i].shapes.push(item);
+            
             for (var j = 0; j < product.Design_List[i].shapes.length; j++) {
                 if(product.Design_List[i].shapes[j].id == changeitem.id)
                 {
@@ -179,81 +172,45 @@ Product.prototype.updateDesignColor = function (item,i,colorstr){
      
 };
 Product.prototype.updateTextDesign= function(item, fontid, str, fillcolor, strokecolor){
-
-   var selectedObj = canvas.getActiveObject();
-   if (item.length == 0)
-   return;
-   var id = item.id ;
-   if(item.text == str)
-   {
-      var item    = getCharacters(fontid, item.text,fillcolor,strokecolor);
-   }
-   else{
-      var item    = getCharacters(fontid, str,fillcolor,strokecolor);
-   }
-   item.set('objType', 'text');
-   item.set('fillColor', fillcolor);
-   item.set('strokeColor', strokecolor);
-   item.set('text',str);
-   item.set('placementID',item.placementID);
-   item.scale(0.1);
-   item.sizelock = false;
-   _render(item);
-   canvas.remove(selectedObj);
-   canvas.add(item);
+   if (item == null ) {
+        alert('Please select a Object.');
+        return;
+    }
+    var changeitem    = getCharacters(fontid, item.text,fillcolor,strokecolor);
+   
+   changeitem.set('id', item.id);
+   changeitem.set('objType', 'text');
+   changeitem.set('fillColor', fillcolor);
+   changeitem.set('strokeColor', strokecolor);
+   changeitem.set('text',str);
+   changeitem.set('placementID',item.placementID);
+   changeitem.scale(0.1);
+   changeitem.sizelock = false;
+   //_render(item);
+   canvas.remove(item);
+   canvas.add(changeitem);
    
    // preview image
+   canvas.setActiveObject(changeitem); 
+   product.setSelectObj(changeitem);
+    for (var i =0 ; i<product.Design_List.length  ; i++) {     
+        if( product.Design_List[i].placementID == item.placementID)
+        {
+        //product.Design_List[i].shapes.push(item);
+            for (var j = 0; j < product.Design_List[i].shapes.length; j++) {
+                if(product.Design_List[i].shapes[j].id == changeitem.id)
+                {
+                    product.Design_List[i].shapes[j] = changeitem;
+                }
+            }
+            break;
+        }
 
-   canvas.setActiveObject(item);
-   // object layer
-  // $('#clipart_layer').find('li.active').removeClass('active');
-  // $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
-   // active clipart object.
-   product.setSelectObj(item);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// console.log(item.left+"_"+item.top);
-//     item.sizelock = ca.LockSize;
-//     changeitem.set('id',item.id);
-//     changeitem.set('objType', item.objType);
-//     canvas.add(changeitem);
-//     canvas.remove(item);
-//     canvas.setActiveObject(changeitem);
-//     for (var i =0 ; i<product.Design_List.length  ; i++) {     
-//        if( product.Design_List[i].placementID == item.placementID)
-//        {
-//             //product.Design_List[i].shapes.push(item);
-//             for (var j = 0; j < product.Design_List[i].shapes.length; j++) {
-//                 if(product.Design_List[i].shapes[j].id == changeitem.id)
-//                 {
-//                     product.Design_List[i].shapes[j] = changeitem;
-//                 }
-//             }
-//             break;
-//        }
-
-//     }
-//     var cid = changeitem.objType + '_' + changeitem.id; 
-//     var mycanvas = document.getElementById(cid);
-//     var myctx    = mycanvas.getContext('2d');
-//     myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
+    }
+   // $('#clipart_layer').find('li.active').removeClass('active');
+   // $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
+   $('#clipart_layer').find('#text_' + changeitem.id).attr('src', changeitem.toDataURL('png'));
+   
 }
 var product;
 var sessionid;
@@ -456,10 +413,8 @@ function getCharacters(fontid, characters, fillcolorstr, strokecolor,x,y) {
                     height = c.CanvasObject.Height;
                     
                 }
-                console.log(c);
                 c.CanvasObject.Groups[0].Fill.HtmlColor = fillcolorstr;
                 c.CanvasObject.Groups[0].StrokeWidth = 15;
-                console.log(c);
                 cliparts.push(new fabric.Image(getCanvasObjects([c.CanvasObject],"text"), {                   
                     left    : left,
                     top     : canvas.height / 2,
@@ -534,17 +489,17 @@ function _render(source) {
     
     canvas.renderAll();
 }
-
-function drawCharacters(fontid, $that, x, y,colorstr,placementID) {
+function drawCharacters(fontid, $that, x, y,fillcolorstr,strokecolorstr,placementID) {
     var characters = $that.val();
     if (characters.length == 0)
     return;
     var id      = product.getID();
-    var item    = getCharacters(fontid, characters, colorstr,colorstr);
+    var item    = getCharacters(fontid, characters, fillcolorstr,strokecolorstr);
    // console.log(item);
+    item.set('id', id);
     item.set('objType', 'text');
-    item.set('fillColor', colorstr);
-    item.set('strokeColor', colorstr);
+    item.set('fillColor', fillcolorstr);
+    item.set('strokeColor', strokecolorstr);
     item.set('text',characters);
     item.set('placementID',placementID);
     item.scale(0.1);
@@ -1033,7 +988,7 @@ $('body').on('click', '#colorpad a', function(event) {
 
     if(activeObj.type =="image")
     {
-     product.updateDesignColor(canvas.getActiveObject(),$('.colorlayer').find('a.active').attr('data-id'),$(this).css('background-color'));
+     product.updateImageDesign(canvas.getActiveObject(),$('.colorlayer').find('a.active').attr('data-id'),$(this).css('background-color'));
     }
     else{
      product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#fillcolor').css('background-color'),$('#strokecolor').css('background-color'));
@@ -1048,7 +1003,7 @@ $('body').on('click', '#patternpad a', function(event) {
     activeObj = canvas.getActiveObject();
     if(activeObj.type =="image")
     {
-     product.updateDesignColor(canvas.getActiveObject(),$('.colorlayer').find('a.active').attr('data-id'),$(this).next().attr('id'));
+     product.updateImageDesign(activeObj,$('.colorlayer').find('a.active').attr('data-id'),$(this).next().attr('id'));
     }
     else{
      product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#fillcolor').css('background-image'), $('#strokecolor').css('background-image'));
@@ -1498,7 +1453,7 @@ $('#gotext').click(function(){
     $('.edittextbox').hide();
     $('#tbx').val($('#tbxbefore').val());
     $('.texteditor').show();
-    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2,"#1c1a1c",1);
+    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2,$("#fillcolor").css("background-color"),$("#strokecolor").css("background-color"),1);
     
     $('cliparteditor').hide();
 });
