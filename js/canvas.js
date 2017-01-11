@@ -18,6 +18,19 @@ Product.prototype.addDesign_Object = function (Name, PreviewImage,placementID,it
     return designobj;
 
 };
+Product.prototype.addPlacement = function (Name,PreviewImage,PlacementID) {
+    var ID = product.Design_List.length;
+    product.ID = 0;
+    product.Name = "";// In the future, What,   I have to in here?
+    product.Design_List[ID] = {
+                    ID:ID,
+                    Name:Name,
+                    previewImage:PreviewImage,
+                    placementID: PlacementID,
+                    shapes:[]
+                };
+                return product;
+    };
 Product.prototype.getID = function(){
     var id = 0;
     if(product.Design_List.length>0)
@@ -46,12 +59,24 @@ Product.prototype.setSelectObj = function (item) {
         removeobj = 0;
         // Set value to html elements.
 
+        
         for (var i = 0; i < ca.CanvasObject.Colors.length; i ++) {
-            html += '<a class="btn btn-default colorpicker selectcolor" data-id="' + i 
-                 + '" style="background-color: ' 
-                 + ca.CanvasObject.Colors[i].HtmlColor 
-                 + '"></a>';
-        }
+         var colstr = ca.CanvasObject.Colors[i].HtmlColor ;
+            if(!colstr.includes("img"))
+            {
+               
+               html += '<a class="btn btn-default colorpicker selectcolor" data-id="' + i 
+                    + '" style="background-color: ' 
+                    + ca.CanvasObject.Colors[i].HtmlColor 
+                    + '"></a>';
+            }
+            else{
+               var imgstr = $('.cliparteditor .colorlayer').children().eq(i).css('background-image');
+               html += "<a class='btn btn-default colorpicker selectcolor' data-id='" + i 
+                    + "' style='background-image : "+imgstr + ";background-color:"+ ca.CanvasObject.Colors[i].HtmlColor +"'></a>";
+            }
+
+         }
 
         if(item.sizelock)
         {
@@ -65,8 +90,10 @@ Product.prototype.setSelectObj = function (item) {
             $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
             $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
         }
-
-        $('.colorlayer').html(html);
+        var i = $('.cliparteditor .colorlayer').find('a.active').attr('data-id');
+        $('.cliparteditor .colorlayer').html(html);
+        $('.cliparteditor .colorlayer').find('a.active').removeClass('active');
+        $('.cliparteditor .colorlayer').find("[data-id='" + i + "']").addClass('active');
         $('#clipart_width_text,  #clipart_width_range').val( parseFloat(item.getWidth()) );
         $('#clipart_height_text, #clipart_height_range').val( parseFloat(item.getHeight()) );
         $('#clipart_angle_text,  #clipart_angle_range').val( item.getAngle());
@@ -108,18 +135,14 @@ Product.prototype.setSelectObj = function (item) {
 
     $('#clipart_layer').find('li.active').removeClass('active');
     $('#clipart_layer').find("[data-id='text_" + selectedObjId + "']").addClass('active');
-    $('#lock').attr('data-lock', 'false');
-    $('#lock').css('background-position', '0 -3650px');
+    $('#lock').attr('data-lock', 'true');
+    $('#lock').css('background-position', '0 -3600px');
 
     item.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
     $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
     $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
-
-     // var html = '';
-     // html += '<a class="btn btn-default colorpicker selectcolor" data-id="0" style="background-color: ' 
-     //         + "red" 
-     //         + '"></a>';
-     //  $('.colorlayer').html(html);
+    $('#fillcolor').css('background-color',item.fillColor);
+    $('#strokecolor').css('background-color',item.strokeColor);
     }
 };
 Product.prototype.updateImageDesign = function (item,i,colorstr){
@@ -129,6 +152,7 @@ Product.prototype.updateImageDesign = function (item,i,colorstr){
     }
     var  ca = item.sevData;
     ca.CanvasObject.Colors[i].HtmlColor = colorstr;
+    console.log(ca);
     var   source = getCanvasObjects([ca.CanvasObject],item.objType);
     var   changeitem = new fabric.Image(source, {        
             left:   item.left,
@@ -358,6 +382,7 @@ function getCanvasObjects(data_array,objtype) {
 
             if (g.Fill !== undefined) {
                 if ( g.Fill.HtmlColor.indexOf('img_pattern') != -1) {
+
                     var image = document.getElementById(g.Fill.HtmlColor);
                     ctx.fillStyle = ctx.createPattern(image, "repeat");
                 } else { 
@@ -397,24 +422,26 @@ function getCharacters(fontid, characters, fillcolorstr, strokecolor,x,y) {
     var spacing     = 1;
     var left        = canvas.width / 2;
     var height      = 0;
-    // console.log(fontid);
+    console.log(fillcolorstr);
     // console.log(fonts[fontid]);
+
     for (var i = 0; i < characters.length; i++) {
         for (var j = 0; j < fonts[fontid].Characters.length; j++) {
 
             var c = fonts[fontid].Characters[j];
             c.CanvasObject.Groups[0].Stroke = {
-             HtmlColor:strokecolor,
-             Pattern:""
-            }
+                HtmlColor:strokecolor,
+                Pattern:""
+               };
+            c.CanvasObject.Groups[0].Fill.HtmlColor = fillcolorstr;   
+            
+            console.log(c);
             if (c.Character == characters[i]) {
-                // console.log(c.Character + ':' + c.CanvasObject.Height)
                 if (c.CanvasObject.Height > height) {
                     height = c.CanvasObject.Height;
                     
                 }
-                c.CanvasObject.Groups[0].Fill.HtmlColor = fillcolorstr;
-                c.CanvasObject.Groups[0].StrokeWidth = 15;
+                c.CanvasObject.Groups[0].StrokeWidth = 20;
                 cliparts.push(new fabric.Image(getCanvasObjects([c.CanvasObject],"text"), {                   
                     left    : left,
                     top     : canvas.height / 2,
@@ -422,11 +449,7 @@ function getCharacters(fontid, characters, fillcolorstr, strokecolor,x,y) {
                     originY : 'bottom',
                     width   : c.CanvasObject.Width,
                     height  : c.CanvasObject.Height,
-                    // stroke  : '#1c1a1c',
-                    // strokeWidth: 5,
-                    
                 }));
-                // console.log("getCharacters, c.CanvasObject.ID:" + c.CanvasObject.ID);
                 left += c.CanvasObject.Width + spacing;
                 break;
             }
@@ -437,7 +460,6 @@ function getCharacters(fontid, characters, fillcolorstr, strokecolor,x,y) {
         left: canvas.width / 2,
         top: canvas.height / 2,
     });
-
     return  grp;
 }
 
@@ -522,14 +544,18 @@ function drawCharacters(fontid, $that, x, y,fillcolorstr,strokecolorstr,placemen
     }
     else{
         product.Design_List.push(product.addDesign_Object("","",placementID,item));
-
     }
     canvas.setActiveObject(item);
     // object layer
     $('#clipart_layer').find('li.active').removeClass('active');
-    $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
-	$('#clipart_layer').find('#text_' + id).attr('src', item.toDataURL('png'));
-    product.setSelectObj(item);
+    $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><image width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
+	   $('#clipart_layer').find('#text_' + item.id).attr('src', item.toDataURL('png'));
+    //var imagecanvas_ = new fabric.Canvas('imageCanvas');
+    // var cid = item.objType + '_' + item.id; 
+    // var mycanvas = document.getElementById(cid);
+    // var myctx    = mycanvas.getContext('2d');
+    // myctx.drawImage(item, 0, 0, item.width, source.height, 0, 0, 35, 35);
+    // product.setSelectObj(item);
 }
 function listFonts() {
     var xml = "<request><sessionid>" + sessionid + "</sessionid></request>";
@@ -615,76 +641,6 @@ function listPlacement() {
         }
     });
 }
-
-// Update Object's color.
-function updateObjColor() {
-    // Get selected Object.
-    var selectedObj = canvas.getActiveObject();
-
-    if (selectedObj == null ) {
-        alert('Please select a clipart.');
-        return;
-    }
-
-    var selectedObjId = selectedObj.id;
-    var selectedObjType = selectedObj.type;
-    var ca;
-    var source;
-    var item;
-
-    if(selectedObjType == 'image') {
-        ca = design_clipart[selectedObjId];   
-        source = getCanvasObjects([ca.CanvasObject],selectedObjType);
-         // Add mix colored Object.
-        item = new fabric.Image(source, {        
-            left:   selectedObj.left,
-            top:    selectedObj.top,
-            width:  selectedObj.getWidth(),
-            height: selectedObj.getHeight(),
-            angle:  selectedObj.getAngle(),
-            // opacity : 0.5,
-            originX: 'center',
-            originY: 'center'
-        }); 
-    }
-    else{
-
-        ca = design_clipart[selectedObjId];
-        source = getCanvasObjects([ca.CanvasObject],selectedObjType);
-        item = new fabric.Image(source, {        
-            left:   selectedObj.left,
-            top:    selectedObj.top,
-            width:  selectedObj.getWidth(),
-            height: selectedObj.getHeight(),
-            angle:  selectedObj.getAngle(),
-            // opacity : 0.5,
-            originX: 'center',
-            originY: 'center'
-        });
-    }
-
-    // item.scale(0.2);
-
-    item.set('id', selectedObjId);
-    item.set('objType', selectedObjType);
-    canvas.add(item);
-   
-    // Remove selected Object.
-    canvas.remove(selectedObj);
-
-    // Set active new object.
-    canvas.setActiveObject(item);
-
-    // Update object layer's image.
-    var cid = selectedObjType + '_' + selectedObjId;
-    $('#clipart_layer').find("[data-id='" + cid + "']").attr('src', item.toDataURL('png'));
-                    
-    var mycanvas = document.getElementById(cid);
-    var myctx    = mycanvas.getContext('2d');
-
-    myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
-}
-
 function drawClipArt(clipartid, x, y, placementID) {
     var xml = "<request><sessionid>" + sessionid + "</sessionid><clipartid>" + clipartid + "</clipartid></request>";
     
@@ -793,7 +749,7 @@ function drawClipArt(clipartid, x, y, placementID) {
                          + ca.CanvasObject.Colors[i].HtmlColor 
                          + '"></a>';
                 }   
-                $('.colorlayer').html(html);
+                $('.cliparteditor .colorlayer').html(html);
                 $('#clipart_width_text,  #clipart_width_range').val( parseFloat(item.getWidth()) );
                 $('#clipart_height_text, #clipart_height_range').val( parseFloat(item.getHeight()));
                 $('#clipart_angle_text,  #clipart_angle_range').val( item.getAngle());
@@ -974,21 +930,23 @@ function getColorPalette() {
 }
 // Select a color layer.
 
-$('body').on('click', '.colorlayer a', function(event) {
-    $('.colorlayer').find('a.active').removeClass('active');
+$('body').on('click', '.cliparteditor .colorlayer a', function(event) {
+    $('.cliparteditor .colorlayer').find('a.active').removeClass('active');
     $(this).addClass('active');
 });
-
-// Select a color in color pad.
-$('body').on('click', '#colorpad a', function(event) {
-    $('.colorlayer').find('a.active').css('background-color', $(this).css('background-color'));
-    $('.colorlayer').find('a.active').css('background-image', '');
+$('body').on('click', '.texteditor .colorlayer a', function(event) {
+    $('.texteditor .colorlayer').find('a.active').removeClass('active');
+    $(this).addClass('active');
+});
+$('body').on('click', '.texteditor #colorpad a', function(event) {
+    $('.texteditor .colorlayer').find('a.active').css('background-color', $(this).css('background-color'));
+    $('.texteditor .colorlayer').find('a.active').css('background-image', '');
     isSelectedColor = true;
     activeObj = canvas.getActiveObject();
 
     if(activeObj.type =="image")
     {
-     product.updateImageDesign(canvas.getActiveObject(),$('.colorlayer').find('a.active').attr('data-id'),$(this).css('background-color'));
+     product.updateImageDesign(canvas.getActiveObject(),$('.texteditor .colorlayer').find('a.active').attr('data-id'),$(this).css('background-color'));
     }
     else{
      product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#fillcolor').css('background-color'),$('#strokecolor').css('background-color'));
@@ -996,14 +954,52 @@ $('body').on('click', '#colorpad a', function(event) {
     
 });
 // Select a pattern in pattern pad.
-$('body').on('click', '#patternpad a', function(event) {
-    $('.colorlayer').find('a.active').css('background-color', '');
-    $('.colorlayer').find('a.active').css('background-image', $(this).css('background-image'));
+$('body').on('click', '.texteditor #patternpad a', function(event) {
+    $('.texteditor .colorlayer').find('a.active').css('background-color', '');
+    $('.texteditor .colorlayer').find('a.active').css('background-image', $(this).css('background-image'));
     isSelectedColor = true;
     activeObj = canvas.getActiveObject();
     if(activeObj.type =="image")
     {
-     product.updateImageDesign(activeObj,$('.colorlayer').find('a.active').attr('data-id'),$(this).next().attr('id'));
+     product.updateImageDesign(activeObj,$('.texteditor .colorlayer').find('a.active').attr('data-id'),$(this).next().attr('id'));
+    }
+    else{
+      if($('.texteditor .colorlayer').find('a.active').attr('id') == "fillcolor")
+      { 
+         product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
+      }
+      else if($('.texteditor .colorlayer').find('a.active').attr('id') == "strokecolor")
+      {
+        
+         product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#strokecolor').css('background-color'), $(this).next().attr('id'));
+      }
+    }
+});
+// Select a color in color pad.
+$('body').on('click', '.cliparteditor #colorpad a', function(event) {
+    $('.cliparteditor .colorlayer').find('a.active').css('background-color', $(this).css('background-color'));
+    $('.cliparteditor .colorlayer').find('a.active').css('background-image', '');
+    isSelectedColor = true;
+    activeObj = canvas.getActiveObject();
+
+    if(activeObj.type =="image")
+    {
+     product.updateImageDesign(canvas.getActiveObject(),$('.cliparteditor .colorlayer').find('a.active').attr('data-id'),$(this).css('background-color'));
+    }
+    else{
+     product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#fillcolor').css('background-color'),$('#strokecolor').css('background-color'));
+    }
+    
+});
+// Select a pattern in pattern pad.
+$('body').on('click', '.cliparteditor #patternpad a', function(event) {
+    $('.cliparteditor .colorlayer').find('a.active').css('background-color', '');
+    $('.cliparteditor .colorlayer').find('a.active').css('background-image', $(this).css('background-image'));
+    isSelectedColor = true;
+    activeObj = canvas.getActiveObject();
+    if(activeObj.type =="image")
+    {
+     product.updateImageDesign(activeObj,$('.cliparteditor .colorlayer').find('a.active').attr('data-id'),$(this).next().attr('id'));
     }
     else{
      product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#fillcolor').css('background-image'), $('#strokecolor').css('background-image'));
@@ -1308,15 +1304,24 @@ $('body').on('click', '#clipart_layer li', function(e) {
 });
 var newplacement = null;
 $('.placement-modal .modal-body').on('click', 'div',function () {
-    // var placement_list = [];
-    // if(product.Designs.placement.length>0)
-    // {
-        
-    // }
-    // else{
+    if(product.Design_List.length>0)
+    {
+        for (var i =0 ; i<product.Design_List.length  ; i++) {
+            
+           if( product.Design_List[i].placementID == placementID)
+           {
+                product.Design_List[i].shapes.push(item);
+           }
+           else{
+                product.Design_List.push(product.addDesign_Object("","",placementID,item));
+            }
+        }
+    }
+    else{
+        product.Design_List.push(product.addDesign_Object("","",placementID,item));
 
-    // }
-    console.log(product.Designs.placement);
+    }
+
     $('.placement-modal .modal-body').find('.active').removeClass('active');
     $(this).addClass('active');
     newplacement = $(this);
@@ -1480,6 +1485,7 @@ $(document).ready(function() {
 // });
 $('body').on('click','#listClipArt li',function(event) { 
     //console.log($(this).html());
+    $('.edittextbox').hide();
     drawClipArt($(this).attr('id'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2,1);
 });
 $('#dlFonts_form').change(function(){
