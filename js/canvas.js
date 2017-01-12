@@ -228,12 +228,12 @@ Product.prototype.updateImageDesign = function(item, i, colorstr) {
     myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
 
 };
-Product.prototype.updateTextDesign = function(item, fontid, str, fillcolor, strokecolor) {
+Product.prototype.updateTextDesign = function(item, fontid, str, fillcolor, strokecolor,spacing) {
     if (item == null) {
         alert('Please select a Object.');
         return;
     }
-    var changeitem = getCharacters(fontid, item.text, fillcolor, strokecolor);
+    var changeitem = getCharacters(fontid, item.text, fillcolor, strokecolor, spacing);
 
     changeitem.set('id', item.id);
     changeitem.set('objType', 'text');
@@ -445,9 +445,8 @@ function getCanvasObjects(data_array, objtype) {
     return (cTemp);
 }
 
-function getCharacters(fontid, characters, fillcolorstr, strokecolor, x, y) {
+function getCharacters(fontid, characters, fillcolorstr, strokecolor, spacing) {
     var cliparts = [];
-    var spacing = 1;
     var left = canvas.width / 2;
     var height = 0;
     console.log(fillcolorstr);
@@ -540,12 +539,12 @@ function _render(source) {
     canvas.renderAll();
 }
 
-function drawCharacters(fontid, $that, x, y, fillcolorstr, strokecolorstr, placementID) {
+function drawCharacters(fontid, $that, x, y, fillcolorstr, strokecolorstr, placementID,spacing) {
     var characters = $that.val();
     if (characters.length == 0)
         return;
     var id = product.getID();
-    var item = getCharacters(fontid, characters, fillcolorstr, strokecolorstr);
+    var item = getCharacters(fontid, characters, fillcolorstr, strokecolorstr,spacing);
     // console.log(item);
     item.set('id', id);
     item.set('objType', 'text');
@@ -670,7 +669,6 @@ function listPlacement() {
 
 function drawClipArt(clipartid, x, y, placementID) {
     var xml = "<request><sessionid>" + sessionid + "</sessionid><clipartid>" + clipartid + "</clipartid></request>";
-    alert(product.getPlacement(1));
     $.ajax({
         type: "POST",
         url: url + "/Site.svc/ClipArtGet",
@@ -979,7 +977,7 @@ $('body').on('click', '.texteditor #colorpad a', function(event) {
     if (activeObj.type == "image") {
         product.updateImageDesign(canvas.getActiveObject(), $('.texteditor .colorlayer').find('a.active').attr('data-id'), $(this).css('background-color'));
     } else {
-        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
+        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'),$('#clipart_arc_range').val());
     }
 
 });
@@ -993,10 +991,10 @@ $('body').on('click', '.texteditor #patternpad a', function(event) {
         product.updateImageDesign(activeObj, $('.texteditor .colorlayer').find('a.active').attr('data-id'), $(this).next().attr('id'));
     } else {
         if ($('.texteditor .colorlayer').find('a.active').attr('id') == "fillcolor") {
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'),$('#clipart_arc_range').val());
         } else if ($('.texteditor .colorlayer').find('a.active').attr('id') == "strokecolor") {
 
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#strokecolor').css('background-color'), $(this).next().attr('id'));
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#strokecolor').css('background-color'), $(this).next().attr('id'),$('#clipart_arc_range').val());
         }
     }
 });
@@ -1010,7 +1008,7 @@ $('body').on('click', '.cliparteditor #colorpad a', function(event) {
     if (activeObj.type == "image") {
         product.updateImageDesign(canvas.getActiveObject(), $('.cliparteditor .colorlayer').find('a.active').attr('data-id'), $(this).css('background-color'));
     } else {
-        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
+        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'),$('#clipart_arc_range').val());
     }
 
 });
@@ -1023,7 +1021,7 @@ $('body').on('click', '.cliparteditor #patternpad a', function(event) {
     if (activeObj.type == "image") {
         product.updateImageDesign(activeObj, $('.cliparteditor .colorlayer').find('a.active').attr('data-id'), $(this).next().attr('id'));
     } else {
-        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-image'), $('#strokecolor').css('background-image'));
+        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-image'), $('#strokecolor').css('background-image'),$('#clipart_arc_range').val());
     }
 });
 
@@ -1138,6 +1136,12 @@ $('#clipart_arc_text, #clipart_arc_range').mousedown(function(event) {
     canvas.renderAll();
 }).mouseup(function(event) {
     isChagingAngle = false;
+     if ($('.texteditor .colorlayer').find('a.active').attr('id') == "fillcolor") {
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'),$('#clipart_arc_range').val());
+        } else if ($('.texteditor .colorlayer').find('a.active').attr('id') == "strokecolor") {
+
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#strokecolor').css('background-color'), $(this).next().attr('id'),$('#clipart_arc_range').val());
+        }
 });
 
 // ---------------------------------------------------------------------------
@@ -1344,7 +1348,7 @@ $('.placement-modal .modal-body').on('click', 'div', function() {
 });
 $("#tbx").on('input', function(e){
    activeObj = canvas.getActiveObject();
-   product.updateTextDesign(activeObj,$('#dlFonts_form').val(),$(this).val(),$('#fillcolor').css('background-color'),$('#strokecolor').css('background-color'));
+   product.updateTextDesign(activeObj,$('#dlFonts_form').val(),$(this).val(),$('#fillcolor').css('background-color'),$('#strokecolor').css('background-color'),$('#clipart_arc_range').val());
    $('.texteditor').show();
 });
 $('#select_placement').click(function(event) {
@@ -1478,7 +1482,7 @@ $('#gotext').click(function() {
     $('.edittextbox').hide();
     $('#tbx').val($('#tbxbefore').val());
     $('.texteditor').show();
-    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, $("#fillcolor").css("background-color"), $("#strokecolor").css("background-color"), 1);
+    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, $("#fillcolor").css("background-color"), $("#strokecolor").css("background-color"), 1,1);
 
     $('cliparteditor').hide();
 });
@@ -1495,8 +1499,7 @@ $(document).ready(function() {
     p_flag = 0;
     isaddtext = 0;
     $('.tab_custom').height($('.colortab_custom').height());
-    var acc = document.getElementsByClassName("accordion");
-    var accc = document.getElementsByClassName("accordion1");
+    
     acc[0].classList.toggle("active");
     acc[0].nextElementSibling.classList.toggle("show");
     accc[0].classList.toggle("active");
@@ -1504,14 +1507,12 @@ $(document).ready(function() {
 });
 
 $('body').on('click', '#listClipArt li', function(event) {
-    //console.log($(this).html());
     $('.edittextbox').hide();
     drawClipArt($(this).attr('id'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, 1);
 });
 $('#dlFonts_form').change(function() {
-    //   drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);        
+         
     if (canvas.getActiveObject().objType == "text") {
-        //drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);   
         updateCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);
     }
 });
@@ -1526,10 +1527,9 @@ $('body').on('click', '.closebtn', function(e) {
     $('.secondp').hide();
     $('.firstp').show();
 });
+var i;
 var acc = document.getElementsByClassName("accordion");
 var accc = document.getElementsByClassName("accordion1");
-var i;
-
 for (i = 0; i < acc.length; i++) {
     acc[i].onmousedown = function() {
         $('.tab_custom').height();
