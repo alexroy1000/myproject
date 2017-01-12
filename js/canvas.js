@@ -5,88 +5,113 @@
 }
 
 
-Product.prototype.addDesign_Object = function (Name, PreviewImage,placementID,item) {
+Product.prototype.addDesign_Object = function(Name, PreviewImage, placementID, item) {
     var ID = product.Design_List.length;
     var designobj = {
-                    ID:ID,
-                    Name:Name,
-                    previewImage:PreviewImage,
-                    placementID: placementID,
-                    shapes:[]
-                };
+        ID: ID,
+        Name: Name,
+        previewImage: PreviewImage,
+        placementID: placementID,
+        shapes: []
+    };
     designobj.shapes.push(item);
     return designobj;
 
 };
-Product.prototype.addPlacement = function (Name,PreviewImage,PlacementID) {
+Product.prototype.getPlacement = function(placementID) {
+    var click_product = null;
+    $('.placement-modal .modal-body').children('div').each(function() {
+        if ($(this).children('img').attr('data-id') == placementID) {
+            click_product = {
+                ID: $(this).children('img').attr('data-id'),
+                Name: $(this).children('img').attr('data-name'),
+                Overlap: $(this).children('img').attr('data-overlap'),
+                Width: $(this).children('img').attr('data-width'),
+                Height: $(this).children('img').attr('data-height'),
+                PreviewImage: $(this).children('img').attr('src')
+            };
+        }
+        
+    });
+    return click_product;
+}
+
+Product.prototype.addPlacement = function(Name, PreviewImage, PlacementID) {
     var ID = product.Design_List.length;
     product.ID = 0;
-    product.Name = "";// In the future, What,   I have to in here?
+    product.Name = ""; // In the future, What,   I have to in here?
     product.Design_List[ID] = {
-                    ID:ID,
-                    Name:Name,
-                    previewImage:PreviewImage,
-                    placementID: PlacementID,
-                    shapes:[]
-                };
-                return product;
+        ID: ID,
+        Name: Name,
+        previewImage: PreviewImage,
+        placementID: PlacementID,
+        shapes: []
     };
-Product.prototype.getID = function(){
+    return product;
+};
+Product.prototype.getID = function() {
     var id = 0;
-    if(product.Design_List.length>0)
-    {
+    if (product.Design_List.length > 0) {
         for (var i = 0; i < product.Design_List.length; i++) {
             id += product.Design_List[i].shapes.length;
         }
     }
     return id;
 }
-Product.prototype.setSelectObj = function (item) {
+Product.prototype.setSelectObj = function(item) {
     activeObj = item;
     var selectedObjId = item.id;
     var ca = item.sevData;
-    if(item.objType == "image")
-    {
+    if (item.objType == "image") {
         var html = '';
         $(".cliparteditor").show();
         $(".texteditorext").hide();
 
         if (removeobj == 0) {
-        $('.cliparteditor').show();
+            $('.cliparteditor').show();
             $(".colortab_custom").show();
             $(".texteditor").hide();
         }
         removeobj = 0;
         // Set value to html elements.
 
-        
-        for (var i = 0; i < ca.CanvasObject.Colors.length; i ++) {
-         var colstr = ca.CanvasObject.Colors[i].HtmlColor ;
-            if(!colstr.includes("img"))
-            {
-               
-               html += '<a class="btn btn-default colorpicker selectcolor" data-id="' + i 
-                    + '" style="background-color: ' 
-                    + ca.CanvasObject.Colors[i].HtmlColor 
-                    + '"></a>';
-            }
-            else{
-               var imgstr = $('.cliparteditor .colorlayer').children().eq(i).css('background-image');
-               html += "<a class='btn btn-default colorpicker selectcolor' data-id='" + i 
-                    + "' style='background-image : "+imgstr + ";background-color:"+ ca.CanvasObject.Colors[i].HtmlColor +"'></a>";
+
+        for (var i = 0; i < ca.CanvasObject.Colors.length; i++) {
+            var colstr = ca.CanvasObject.Colors[i].HtmlColor;
+            if (!colstr.includes("img")) {
+
+                html += '<a class="btn btn-default colorpicker selectcolor" data-id="' + i +
+                    '" style="background-color: ' +
+                    ca.CanvasObject.Colors[i].HtmlColor +
+                    '"></a>';
+            } else {
+                var imgstr = $('.cliparteditor .colorlayer').children().eq(i).css('background-image');
+                html += "<a class='btn btn-default colorpicker selectcolor' data-id='" + i +
+                    "' style='background-image : " + imgstr + ";background-color:" + ca.CanvasObject.Colors[i].HtmlColor + "'></a>";
             }
 
-         }
+        }
 
-        if(item.sizelock)
-        {
-            item.setControlsVisibility({'bl': false, 'br': false, 'mb': false, 'ml': false, 'mr': false, 'mt': false});
+        if (item.sizelock) {
+            item.setControlsVisibility({
+                'bl': false,
+                'br': false,
+                'mb': false,
+                'ml': false,
+                'mr': false,
+                'mt': false
+            });
             $('#clipart_width_text,  #clipart_width_range').prop('disabled', true);
             $('#clipart_height_text, #clipart_height_range').prop('disabled', true);
-        }
-        else
-        {
-            item.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
+        } else {
+            item.setControlsVisibility({
+                'bl': true,
+                'br': true,
+                'mb': true,
+                'ml': true,
+                'mr': true,
+                'mt': true
+            });
             $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
             $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
         }
@@ -94,9 +119,9 @@ Product.prototype.setSelectObj = function (item) {
         $('.cliparteditor .colorlayer').html(html);
         $('.cliparteditor .colorlayer').find('a.active').removeClass('active');
         $('.cliparteditor .colorlayer').find("[data-id='" + i + "']").addClass('active');
-        $('#clipart_width_text,  #clipart_width_range').val( parseFloat(item.getWidth()) );
-        $('#clipart_height_text, #clipart_height_range').val( parseFloat(item.getHeight()) );
-        $('#clipart_angle_text,  #clipart_angle_range').val( item.getAngle());
+        $('#clipart_width_text,  #clipart_width_range').val(parseFloat(item.getWidth()));
+        $('#clipart_height_text, #clipart_height_range').val(parseFloat(item.getHeight()));
+        $('#clipart_angle_text,  #clipart_angle_range').val(item.getAngle());
 
         $('#clipart_layer').find('li.active').removeClass('active');
         $('#clipart_layer').find("[data-id='image_" + selectedObjId + "']").addClass('active');
@@ -105,125 +130,91 @@ Product.prototype.setSelectObj = function (item) {
         ratio = item.getWidth() / item.getHeight();
 
         canvas.renderAll();
-    }
-    else if(item.objType == "text")
-    {
-    $(".cliparteditor").hide();
-    $(".texteditor").show();
-    if (removeobj == 0) {
-        $(".colortab_custom").show();
-        if(isSelectClipObj == 0)
-        {
-            $(".texteditor").show();
-            $('.cliparteditor').hide();
+    } else if (item.objType == "text") {
+        $(".cliparteditor").hide();
+        $(".texteditor").show();
+        if (removeobj == 0) {
+            $(".colortab_custom").show();
+            if (isSelectClipObj == 0) {
+                $(".texteditor").show();
+                $('.cliparteditor').hide();
+            } else {
+                $(".texteditor").hide();
+                $('.cliparteditor').show();
+            }
         }
-        else{
-            $(".texteditor").hide();
-            $('.cliparteditor').show();
-        }
-    }
-    removeobj = 0;
-    // Set value to html elements.
-        item.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
+        removeobj = 0;
+        // Set value to html elements.
+        item.setControlsVisibility({
+            'bl': true,
+            'br': true,
+            'mb': true,
+            'ml': true,
+            'mr': true,
+            'mt': true
+        });
         $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
         $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
-    
-    // $('#clipart_size_text,  #clipart_size_range').val( parseFloat(selectedObj.getFontSize()) );
-    // $('#clipart_spacing_text, #clipart_spacing_range').val( parseFloat(selectedObj.spacing) );
-    $('#clipart_rotate_text,  #clipart_rotate_range').val( item.getAngle() );
-    // $('#clipart_arc_text,  #clipart_arc_range').val( selectedObj.radius );
 
-    $('#clipart_layer').find('li.active').removeClass('active');
-    $('#clipart_layer').find("[data-id='text_" + selectedObjId + "']").addClass('active');
-    $('#lock').attr('data-lock', 'true');
-    $('#lock').css('background-position', '0 -3600px');
+        // $('#clipart_size_text,  #clipart_size_range').val( parseFloat(selectedObj.getFontSize()) );
+        // $('#clipart_spacing_text, #clipart_spacing_range').val( parseFloat(selectedObj.spacing) );
+        $('#clipart_rotate_text,  #clipart_rotate_range').val(item.getAngle());
+        // $('#clipart_arc_text,  #clipart_arc_range').val( selectedObj.radius );
 
-    item.setControlsVisibility({'bl': true, 'br': true, 'mb': true, 'ml': true, 'mr': true, 'mt': true});
-    $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
-    $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
-    $('#fillcolor').css('background-color',item.fillColor);
-    $('#strokecolor').css('background-color',item.strokeColor);
+        $('#clipart_layer').find('li.active').removeClass('active');
+        $('#clipart_layer').find("[data-id='text_" + selectedObjId + "']").addClass('active');
+        $('#lock').attr('data-lock', 'true');
+        $('#lock').css('background-position', '0 -3600px');
+
+        item.setControlsVisibility({
+            'bl': true,
+            'br': true,
+            'mb': true,
+            'ml': true,
+            'mr': true,
+            'mt': true
+        });
+        $('#clipart_width_text,  #clipart_width_range').prop('disabled', false);
+        $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
+        $('#fillcolor').css('background-color', item.fillColor);
+        $('#strokecolor').css('background-color', item.strokeColor);
     }
 };
-Product.prototype.updateImageDesign = function (item,i,colorstr){
-    if (item == null ) {
+Product.prototype.updateImageDesign = function(item, i, colorstr) {
+    if (item == null) {
         alert('Please select a Object.');
         return;
     }
-    var  ca = item.sevData;
+    var ca = item.sevData;
     ca.CanvasObject.Colors[i].HtmlColor = colorstr;
     console.log(ca);
-    var   source = getCanvasObjects([ca.CanvasObject],item.objType);
-    var   changeitem = new fabric.Image(source, {        
-            left:   item.left,
-            top:    item.top,
-            width:  item.getWidth(),
-            height: item.getHeight(),
-            angle:  item.getAngle(),
-            sizelock : false,
-            originX: 'center',
-            originY: 'center',
-            name : ca.Name,
-            objID:ca.ID,
-            sevData:ca,
-            placementID : item.placementID
-        });  
+    var source = getCanvasObjects([ca.CanvasObject], item.objType);
+    var changeitem = new fabric.Image(source, {
+        left: item.left,
+        top: item.top,
+        width: item.getWidth(),
+        height: item.getHeight(),
+        angle: item.getAngle(),
+        sizelock: false,
+        originX: 'center',
+        originY: 'center',
+        name: ca.Name,
+        objID: ca.ID,
+        sevData: ca,
+        placementID: item.placementID
+    });
     changeitem.sizelock = ca.LockSize;
     item.sizelock = ca.LockSize;
-    changeitem.set('id',item.id);
+    changeitem.set('id', item.id);
     changeitem.set('objType', item.objType);
     canvas.add(changeitem);
     canvas.remove(item);
     canvas.setActiveObject(changeitem);
-    for (var i =0 ; i<product.Design_List.length  ; i++) {     
-       if( product.Design_List[i].placementID == item.placementID)
-       {
-            
-            for (var j = 0; j < product.Design_List[i].shapes.length; j++) {
-                if(product.Design_List[i].shapes[j].id == changeitem.id)
-                {
-                    product.Design_List[i].shapes[j] = changeitem;
-                }
-            }
-            break;
-       }
+    for (var i = 0; i < product.Design_List.length; i++) {
+        if (product.Design_List[i].placementID == item.placementID) {
 
-    }
-    var cid = changeitem.objType + '_' + changeitem.id; 
-    var mycanvas = document.getElementById(cid);
-    var myctx    = mycanvas.getContext('2d');
-    myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
-     
-};
-Product.prototype.updateTextDesign= function(item, fontid, str, fillcolor, strokecolor){
-   if (item == null ) {
-        alert('Please select a Object.');
-        return;
-    }
-    var changeitem    = getCharacters(fontid, item.text,fillcolor,strokecolor);
-   
-   changeitem.set('id', item.id);
-   changeitem.set('objType', 'text');
-   changeitem.set('fillColor', fillcolor);
-   changeitem.set('strokeColor', strokecolor);
-   changeitem.set('text',str);
-   changeitem.set('placementID',item.placementID);
-   changeitem.scale(0.1);
-   changeitem.sizelock = false;
-   //_render(item);
-   canvas.remove(item);
-   canvas.add(changeitem);
-   
-   // preview image
-   canvas.setActiveObject(changeitem); 
-   product.setSelectObj(changeitem);
-    for (var i =0 ; i<product.Design_List.length  ; i++) {     
-        if( product.Design_List[i].placementID == item.placementID)
-        {
-        //product.Design_List[i].shapes.push(item);
             for (var j = 0; j < product.Design_List[i].shapes.length; j++) {
-                if(product.Design_List[i].shapes[j].id == changeitem.id)
-                {
+                if (product.Design_List[i].shapes[j].id == changeitem.id) {
                     product.Design_List[i].shapes[j] = changeitem;
                 }
             }
@@ -231,10 +222,50 @@ Product.prototype.updateTextDesign= function(item, fontid, str, fillcolor, strok
         }
 
     }
-   // $('#clipart_layer').find('li.active').removeClass('active');
-   // $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
-   $('#clipart_layer').find('#text_' + changeitem.id).attr('src', changeitem.toDataURL('png'));
-   
+    var cid = changeitem.objType + '_' + changeitem.id;
+    var mycanvas = document.getElementById(cid);
+    var myctx = mycanvas.getContext('2d');
+    myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
+
+};
+Product.prototype.updateTextDesign = function(item, fontid, str, fillcolor, strokecolor) {
+    if (item == null) {
+        alert('Please select a Object.');
+        return;
+    }
+    var changeitem = getCharacters(fontid, item.text, fillcolor, strokecolor);
+
+    changeitem.set('id', item.id);
+    changeitem.set('objType', 'text');
+    changeitem.set('fillColor', fillcolor);
+    changeitem.set('strokeColor', strokecolor);
+    changeitem.set('text', str);
+    changeitem.set('placementID', item.placementID);
+    changeitem.scale(0.1);
+    changeitem.sizelock = false;
+    //_render(item);
+    canvas.remove(item);
+    canvas.add(changeitem);
+
+    // preview image
+    canvas.setActiveObject(changeitem);
+    product.setSelectObj(changeitem);
+    for (var i = 0; i < product.Design_List.length; i++) {
+        if (product.Design_List[i].placementID == item.placementID) {
+            //product.Design_List[i].shapes.push(item);
+            for (var j = 0; j < product.Design_List[i].shapes.length; j++) {
+                if (product.Design_List[i].shapes[j].id == changeitem.id) {
+                    product.Design_List[i].shapes[j] = changeitem;
+                }
+            }
+            break;
+        }
+
+    }
+    // $('#clipart_layer').find('li.active').removeClass('active');
+    // $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
+    $('#clipart_layer').find('#text_' + changeitem.id).attr('src', changeitem.toDataURL('png'));
+
 }
 var product;
 var sessionid;
@@ -279,7 +310,7 @@ function login() {
                 var mycanvas = document.getElementById('myCanvas');
                 var myctx = mycanvas.getContext('2d');
                 drawGrid();
-                product = new Product();
+                
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {
@@ -311,15 +342,15 @@ function getFont(fontid) {
 }
 
 // Convert from data array to canvas object.
-function getCanvasObjects(data_array,objtype) {
-    var log     = false;
-    var width   = 0;
-    var height  = 0;
-    var gap     = 10;
-    var x       = 0;
-    var y       = 0;
+function getCanvasObjects(data_array, objtype) {
+    var log = false;
+    var width = 0;
+    var height = 0;
+    var gap = 10;
+    var x = 0;
+    var y = 0;
     var baseline = 0;
-    
+
     for (var i = 0; i < data_array.length; i++) {
         var c = data_array[i];
         if (x == 0) {
@@ -327,25 +358,22 @@ function getCanvasObjects(data_array,objtype) {
         }
         if (c.Height > height) {
             height = c.Height;
-        }   
+        }
         width += c.Width;
         width += gap;
     }
     width -= gap;
-    if(objtype=="image")
-    {
+    if (objtype == "image") {
         height = c.Height;
-    y = c.Height / 2;
-    }
-    else if(objtype=="text")
-    {
+        y = c.Height / 2;
+    } else if (objtype == "text") {
         height = c.Height + 200;
         y = c.Height;
     }
-      
-    
+
+
     var cTemp = document.createElement('canvas');
-    cTemp.width  = width;
+    cTemp.width = width;
     cTemp.height = height;
     var ctx = cTemp.getContext('2d');
     for (var da = 0; da < data_array.length; da++) {
@@ -381,11 +409,11 @@ function getCanvasObjects(data_array,objtype) {
             }
 
             if (g.Fill !== undefined) {
-                if ( g.Fill.HtmlColor.indexOf('img_pattern') != -1) {
+                if (g.Fill.HtmlColor.indexOf('img_pattern') != -1) {
 
                     var image = document.getElementById(g.Fill.HtmlColor);
                     ctx.fillStyle = ctx.createPattern(image, "repeat");
-                } else { 
+                } else {
                     ctx.fillStyle = g.Fill.HtmlColor.replace(new RegExp("'", 'g'), "");
                 }
 
@@ -400,11 +428,11 @@ function getCanvasObjects(data_array,objtype) {
 
             if (g.Stroke != undefined) {
                 ctx.strokeStyle = g.Stroke.HtmlColor;
-                ctx.lineWidth   = g.StrokeWidth;
+                ctx.lineWidth = g.StrokeWidth;
                 ctx.stroke();
                 if (log) {
                     console.log('ctx.strokeStyle = ' + g.Stroke.HtmlColor + ';');
-                    console.log('ctx.lineWidth = '   + g.StrokeWidth      + ';');
+                    console.log('ctx.lineWidth = ' + g.StrokeWidth + ';');
                     console.log('ctx.stroke();');
                 }
             }
@@ -417,11 +445,11 @@ function getCanvasObjects(data_array,objtype) {
     return (cTemp);
 }
 
-function getCharacters(fontid, characters, fillcolorstr, strokecolor,x,y) {
- var cliparts    = [];
-    var spacing     = 1;
-    var left        = canvas.width / 2;
-    var height      = 0;
+function getCharacters(fontid, characters, fillcolorstr, strokecolor, x, y) {
+    var cliparts = [];
+    var spacing = 1;
+    var left = canvas.width / 2;
+    var height = 0;
     console.log(fillcolorstr);
     // console.log(fonts[fontid]);
 
@@ -430,37 +458,37 @@ function getCharacters(fontid, characters, fillcolorstr, strokecolor,x,y) {
 
             var c = fonts[fontid].Characters[j];
             c.CanvasObject.Groups[0].Stroke = {
-                HtmlColor:strokecolor,
-                Pattern:""
-               };
-            c.CanvasObject.Groups[0].Fill.HtmlColor = fillcolorstr;   
-            
+                HtmlColor: strokecolor,
+                Pattern: ""
+            };
+            c.CanvasObject.Groups[0].Fill.HtmlColor = fillcolorstr;
+
             console.log(c);
             if (c.Character == characters[i]) {
                 if (c.CanvasObject.Height > height) {
                     height = c.CanvasObject.Height;
-                    
+
                 }
                 c.CanvasObject.Groups[0].StrokeWidth = 20;
-                cliparts.push(new fabric.Image(getCanvasObjects([c.CanvasObject],"text"), {                   
-                    left    : left,
-                    top     : canvas.height / 2,
-                    originX : 'left',
-                    originY : 'bottom',
-                    width   : c.CanvasObject.Width,
-                    height  : c.CanvasObject.Height,
+                cliparts.push(new fabric.Image(getCanvasObjects([c.CanvasObject], "text"), {
+                    left: left,
+                    top: canvas.height / 2,
+                    originX: 'left',
+                    originY: 'bottom',
+                    width: c.CanvasObject.Width,
+                    height: c.CanvasObject.Height,
                 }));
                 left += c.CanvasObject.Width + spacing;
                 break;
             }
         }
     }
-    
+
     var grp = new fabric.Group(cliparts, {
         left: canvas.width / 2,
         top: canvas.height / 2,
     });
-    return  grp;
+    return grp;
 }
 
 function _render(source) {
@@ -505,51 +533,48 @@ function _render(source) {
     source.top = top;
     source.left = left;
     source.saveCoords();
-    
+
     source.setScaleX(scaleX);
     source.setScaleY(scaleY);
-    
+
     canvas.renderAll();
 }
-function drawCharacters(fontid, $that, x, y,fillcolorstr,strokecolorstr,placementID) {
+
+function drawCharacters(fontid, $that, x, y, fillcolorstr, strokecolorstr, placementID) {
     var characters = $that.val();
     if (characters.length == 0)
-    return;
-    var id      = product.getID();
-    var item    = getCharacters(fontid, characters, fillcolorstr,strokecolorstr);
-   // console.log(item);
+        return;
+    var id = product.getID();
+    var item = getCharacters(fontid, characters, fillcolorstr, strokecolorstr);
+    // console.log(item);
     item.set('id', id);
     item.set('objType', 'text');
     item.set('fillColor', fillcolorstr);
     item.set('strokeColor', strokecolorstr);
-    item.set('text',characters);
-    item.set('placementID',placementID);
+    item.set('text', characters);
+    item.set('placementID', placementID);
     item.scale(0.1);
     item.sizelock = false;
     _render(item);
     canvas.add(item);
     activeObj = item;
-    if(product.Design_List.length>0)
-    {
-        for (var i =0 ; i<product.Design_List.length  ; i++) {
-            
-           if( product.Design_List[i].placementID == placementID)
-           {
+    if (product.Design_List.length > 0) {
+        for (var i = 0; i < product.Design_List.length; i++) {
+
+            if (product.Design_List[i].placementID == placementID) {
                 product.Design_List[i].shapes.push(item);
-           }
-           else{
-                product.Design_List.push(product.addDesign_Object("","",placementID,item));
+            } else {
+                product.Design_List.push(product.addDesign_Object("", "", placementID, item));
             }
         }
-    }
-    else{
-        product.Design_List.push(product.addDesign_Object("","",placementID,item));
+    } else {
+        product.Design_List.push(product.addDesign_Object("", "", placementID, item));
     }
     canvas.setActiveObject(item);
     // object layer
     $('#clipart_layer').find('li.active').removeClass('active');
     $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><image width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
-	   $('#clipart_layer').find('#text_' + item.id).attr('src', item.toDataURL('png'));
+    $('#clipart_layer').find('#text_' + item.id).attr('src', item.toDataURL('png'));
     //var imagecanvas_ = new fabric.Canvas('imageCanvas');
     // var cid = item.objType + '_' + item.id; 
     // var mycanvas = document.getElementById(cid);
@@ -557,6 +582,7 @@ function drawCharacters(fontid, $that, x, y,fillcolorstr,strokecolorstr,placemen
     // myctx.drawImage(item, 0, 0, item.width, source.height, 0, 0, 35, 35);
     // product.setSelectObj(item);
 }
+
 function listFonts() {
     var xml = "<request><sessionid>" + sessionid + "</sessionid></request>";
 
@@ -606,12 +632,12 @@ function listClipArt() {
                     $('#listClipArt').append($('<li>', {
                         id: c.ID,
                         html: c.Name,
-                        "data-type":"image",
-                        "data-name":c.Name,
-                        "data-locksize":c.LockSize,
+                        "data-type": "image",
+                        "data-name": c.Name,
+                        "data-locksize": c.LockSize,
 
                     }));
-                    
+
                 }
             }
         }
@@ -626,7 +652,7 @@ function listPlacement() {
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify($.xml2json(xml)),
         dataType: "json",
-        success: function (response) {
+        success: function(response) {
             var r = response.PlacementListResult;
             if (r.isSuccessful == false) {
                 alert(r.ErrorDescription + "(" + r.ErrorNumber + ")");
@@ -635,15 +661,16 @@ function listPlacement() {
                 var data = eval(r.Data);
                 for (var i = 0; i < data.length; i++) {
                     var p = data[i];
-                    $(".placement-modal .modal-body").append("<div style='float:left;'><IMG src='http://api.thetshirtguylv.com/image/placement/" + p.PreviewImage + "' data-width='"+p.Width+"' data-height='"+p.Height+"' data-name='"+p.Name+"' data-overlap='"+p.Overlap+"' data-id='"+p.ID+"'/><br><p align='center'>" + p.Name + "</p></div>");
+                    $(".placement-modal .modal-body").append("<div style='float:left;'><IMG src='http://api.thetshirtguylv.com/image/placement/" + p.PreviewImage + "' data-width='" + p.Width + "' data-height='" + p.Height + "' data-name='" + p.Name + "' data-overlap='" + p.Overlap + "' data-id='" + p.ID + "'/><br><p align='center'>" + p.Name + "</p></div>");
                 }
             }
         }
     });
 }
+
 function drawClipArt(clipartid, x, y, placementID) {
     var xml = "<request><sessionid>" + sessionid + "</sessionid><clipartid>" + clipartid + "</clipartid></request>";
-    
+    alert(product.getPlacement(1));
     $.ajax({
         type: "POST",
         url: url + "/Site.svc/ClipArtGet",
@@ -684,38 +711,38 @@ function drawClipArt(clipartid, x, y, placementID) {
                     }
                 }
 
-                var id = product.getID(); 
+                var id = product.getID();
                 var cid = 'image_' + id;
                 $('#clipart_layer').find('li.active').removeClass('active');
                 $('#clipart_layer').prepend('<li class="active" data-id="' + cid + '"><a data-href="#home"><canvas width="35" height="35" style="border-color:1px solid gray" id="' + cid + '"></canvas></a></li>');
-                
-                var source   = getCanvasObjects([ca.CanvasObject],"image");
-                var mycanvas = document.getElementById(cid);
-                var myctx    = mycanvas.getContext('2d');
 
-                var newWidth  = source.width    / 2;
-                var newHeight = source.height   / 2;
-                var positionX = x - (newWidth   / 2);
-                var positionY = y - (newHeight  / 2);
+                var source = getCanvasObjects([ca.CanvasObject], "image");
+                var mycanvas = document.getElementById(cid);
+                var myctx = mycanvas.getContext('2d');
+
+                var newWidth = source.width / 2;
+                var newHeight = source.height / 2;
+                var positionX = x - (newWidth / 2);
+                var positionY = y - (newHeight / 2);
 
                 myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
-                
+
                 // console.log('source.width='+source.width+','+ 'source.height'+source.height+','+ 'positionX='+','+positionX +'positionY'+positionY+','+ 'newWidth'+newWidth+',' +'newHeight'+newHeight);
-                
+
                 var h = 200 * source.height / source.width;
                 var item = new fabric.Image(source, {
-                    left: canvas.width /2,
-                    top:  canvas.height/2,
+                    left: canvas.width / 2,
+                    top: canvas.height / 2,
                     width: 200,
                     height: h,
                     sizelock: 'false',
                     // opacity : 0.5
-                    placementID : placementID,
+                    placementID: placementID,
                     originX: 'center',
                     originY: 'center',
-                    name:ca.Name,
-                    objId:ca.ID,
-                    sevData:ca,
+                    name: ca.Name,
+                    objId: ca.ID,
+                    sevData: ca,
                 });
 
                 item.sizelock = ca.LockSize;
@@ -724,35 +751,31 @@ function drawClipArt(clipartid, x, y, placementID) {
                 canvas.add(item);
                 canvas.setActiveObject(item);
                 activeObj = item;
-                if(product.Design_List.length>0)
-                {
-                    for (var i =0 ; i<product.Design_List.length  ; i++) {
-                        
-                       if( product.Design_List[i].placementID == placementID)
-                       {
+                if (product.Design_List.length > 0) {
+                    for (var i = 0; i < product.Design_List.length; i++) {
+
+                        if (product.Design_List[i].placementID == placementID) {
                             product.Design_List[i].shapes.push(item);
-                       }
-                       else{
-                            product.Design_List.push(product.addDesign_Object("","",placementID,item));
+                        } else {
+                            product.Design_List.push(product.addDesign_Object("", "", placementID, item));
                         }
                     }
-                }
-                else{
-                    product.Design_List.push(product.addDesign_Object("","",placementID,item));
- 
+                } else {
+                    product.Design_List.push(product.addDesign_Object("", "", placementID, item));
+
                 }
                 var html = '';
                 // Set values in html elements.
-                for (var i = 0; i < ca.CanvasObject.Colors.length; i ++) {
-                    html += '<a class="btn btn-default colorpicker selectcolor" data-id="' + i 
-                         + '" style="background-color: ' 
-                         + ca.CanvasObject.Colors[i].HtmlColor 
-                         + '"></a>';
-                }   
+                for (var i = 0; i < ca.CanvasObject.Colors.length; i++) {
+                    html += '<a class="btn btn-default colorpicker selectcolor" data-id="' + i +
+                        '" style="background-color: ' +
+                        ca.CanvasObject.Colors[i].HtmlColor +
+                        '"></a>';
+                }
                 $('.cliparteditor .colorlayer').html(html);
-                $('#clipart_width_text,  #clipart_width_range').val( parseFloat(item.getWidth()) );
-                $('#clipart_height_text, #clipart_height_range').val( parseFloat(item.getHeight()));
-                $('#clipart_angle_text,  #clipart_angle_range').val( item.getAngle());
+                $('#clipart_width_text,  #clipart_width_range').val(parseFloat(item.getWidth()));
+                $('#clipart_height_text, #clipart_height_range').val(parseFloat(item.getHeight()));
+                $('#clipart_angle_text,  #clipart_angle_range').val(item.getAngle());
                 product.setSelectObj(item);
             }
         }
@@ -761,7 +784,7 @@ function drawClipArt(clipartid, x, y, placementID) {
 
 
 function drawGrid() {
-    var gridWidth  = canvas.width;  // <= you must define this with final grid width
+    var gridWidth = canvas.width; // <= you must define this with final grid width
     var gridHeight = canvas.height; // <= you must define this with final grid height
 
     var groupArray = [];
@@ -770,34 +793,40 @@ function drawGrid() {
     var gridSize = 20; // define grid size
 
     // define presentation option of grid
-    var lineOption = {stroke: '#eee', strokeWidth: 1, selectable:false, strokeDashArray: [0, 0]};
+    var lineOption = {
+        stroke: '#eee',
+        strokeWidth: 1,
+        selectable: false,
+        strokeDashArray: [0, 0]
+    };
 
     // do in two steps to limit the calculations
     // first loop for vertical line
-    for(var i = Math.ceil(gridWidth / gridSize); i--;) {
-        groupArray.push(new fabric.Line([gridSize*i, 0, gridSize*i, gridHeight], lineOption) );
+    for (var i = Math.ceil(gridWidth / gridSize); i--;) {
+        groupArray.push(new fabric.Line([gridSize * i, 0, gridSize * i, gridHeight], lineOption));
     }
     // second loop for horizontal line
-    for(var i = Math.ceil(gridHeight / gridSize); i--;) {
-        groupArray.push(new fabric.Line([0, gridSize*i, gridWidth, gridSize*i], lineOption) );
+    for (var i = Math.ceil(gridHeight / gridSize); i--;) {
+        groupArray.push(new fabric.Line([0, gridSize * i, gridWidth, gridSize * i], lineOption));
     }
 
     // Group add to canvas
     var oGridGroup = new fabric.Group(groupArray, {
-        left: 0, 
-        top: 0, 
-        originX: 'left', 
-        originY: 'top', 
-        selectable:false, 
-        hoverCursor:'pointer'
+        left: 0,
+        top: 0,
+        originX: 'left',
+        originY: 'top',
+        selectable: false,
+        hoverCursor: 'pointer'
     });
     canvas.add(oGridGroup);
 }
-function drawGrayGrid(w, h){
-    w =w*55;
-    h =h*55;
-    var gridlp  = canvas.width/2-w/2;  // <= you must define this with final grid width
-    var gridtp = canvas.height/2-h/2; // <= you must define this with final grid height
+
+function drawGrayGrid(w, h) {
+    w = w * 55;
+    h = h * 55;
+    var gridlp = canvas.width / 2 - w / 2; // <= you must define this with final grid width
+    var gridtp = canvas.height / 2 - h / 2; // <= you must define this with final grid height
     graytlx = gridlp;
     graytly = gridtp;
     graywidth = w;
@@ -808,91 +837,94 @@ function drawGrayGrid(w, h){
     var gridSize = 20; // define grid size
 
     // define presentation option of grid
-    var lineOption = {stroke: '#fff', strokeWidth: 1, selectable:false, strokeDashArray: [0, 0]};
+    var lineOption = {
+        stroke: '#fff',
+        strokeWidth: 1,
+        selectable: false,
+        strokeDashArray: [0, 0]
+    };
 
     // do in two steps to limit the calculations
     // first loop for vertical line
-    for(var i = Math.ceil(w / gridSize); i--;) {
-        groupArray.push(new fabric.Line([gridSize*i, 0, gridSize*i, h], lineOption) );
+    for (var i = Math.ceil(w / gridSize); i--;) {
+        groupArray.push(new fabric.Line([gridSize * i, 0, gridSize * i, h], lineOption));
     }
     // second loop for horizontal line
-    for(var i = Math.ceil(h / gridSize); i--;) {
-        groupArray.push(new fabric.Line([0, gridSize*i, w, gridSize*i], lineOption) );
+    for (var i = Math.ceil(h / gridSize); i--;) {
+        groupArray.push(new fabric.Line([0, gridSize * i, w, gridSize * i], lineOption));
     }
 
     // Group add to canvas
     var rect = new fabric.Rect({
-    left: gridlp,
-    top: gridtp,
-    originX: 'left', 
-    originY: 'top', 
-    width: w,
-    height: h,
-    fill: '#eee',
-    selectable:false, 
-    hoverCursor:'pointer'
-  });
+        left: gridlp,
+        top: gridtp,
+        originX: 'left',
+        originY: 'top',
+        width: w,
+        height: h,
+        fill: '#eee',
+        selectable: false,
+        hoverCursor: 'pointer'
+    });
     var nGridGroup = new fabric.Group(groupArray, {
-        left: gridlp, 
-        top: gridtp, 
-        originX: 'left', 
-        originY: 'top', 
-        selectable:false, 
-        hoverCursor:'pointer'
+        left: gridlp,
+        top: gridtp,
+        originX: 'left',
+        originY: 'top',
+        selectable: false,
+        hoverCursor: 'pointer'
     });
     canvas.add(rect);
     canvas.add(nGridGroup);
 }
 
 function getColorPalette() {
-    
+
     $('.tab_custom').css("height", $('.colortab_custom'));
     var col_array = [];
     var col_name_array = [];
-    var img_dir_array = [] ;
-    var img_pat_array = [] ;
-    var img_name_array = [] ;
+    var img_dir_array = [];
+    var img_pat_array = [];
+    var img_name_array = [];
     var col_group_name = "";
     var pattern_group_name = "";
-    
+
     var xml = "<request><sessionid>" + sessionid + "</sessionid></request>";
-    
+
     $.ajax({
         type: "POST",
         url: url + "/Site.svc/ColorPaletteGet",
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify($.xml2json(xml)),
         dataType: "json",
-        success: function (response) {
+        success: function(response) {
             var r = response.ColorPaletteGetResult;
             if (r.isSuccessful == false) {
                 alert(r.ErrorDescription + "(" + r.ErrorNumber + ")");
                 return;
             } else {
-                
+
                 var data = eval(r.Data);
                 var p = data[0];
                 for (var x = 0; x < p.ColorPaletteGroups.length; x++) {
-                    
+
                     var g = p.ColorPaletteGroups[x];
                     // g.Name,g.PriceIncrease g.id
                     for (var y = 0; y < g.ColorPaletteItems.length; y++) {
 
                         var i = g.ColorPaletteItems[y];
                         // is color?
-                        if (i.HtmlColor != "")
-                        {
+                        if (i.HtmlColor != "") {
                             col_group_name = g.Name;
                             col_array[y] = i.HtmlColor;
                             col_name_array[y] = i.MediaColorName;
                         }
                         // is pattern?
-                        else if(i.HtmlColor == "" && i.PreviewImage != "" )
-                        {
+                        else if (i.HtmlColor == "" && i.PreviewImage != "") {
                             pattern_group_name = g.Name;
-                            img_dir_array[y]   = i.PreviewImage;
-                            img_name_array[y]  = i.MediaColorName;
-                            img_pat_array[y]   = i.PatternImage;
+                            img_dir_array[y] = i.PreviewImage;
+                            img_name_array[y] = i.MediaColorName;
+                            img_pat_array[y] = i.PatternImage;
                             // console.log(y+img_dir_array[y]);
                         }
                         // console.log(i.PatternImage);
@@ -905,7 +937,7 @@ function getColorPalette() {
                 var strx = "";
                 var stry = "";
                 for (var i = 0; i < col_array.length; i++) {
-                    strx += "<a class='btn btn-default selectcolor' style='background:"+col_array[i]+";' title='"+col_name_array[i] +"'></a>";
+                    strx += "<a class='btn btn-default selectcolor' style='background:" + col_array[i] + ";' title='" + col_name_array[i] + "'></a>";
                 }
 
                 for (var i = 0; i < img_dir_array.length; i++) {
@@ -915,7 +947,7 @@ function getColorPalette() {
 
                     // var img = new Image();
                     // img.crossOrigin="anonymous";
-                }    
+                }
                 $('.cliparteditor #colorpad').html(strx);
                 $('.cliparteditor #patternpad').html(stry);
                 $('.cliparteditor #colorx').html("<span class='glyphicon glyphicon-menu-down' aria-hidden='true'></span>  " + col_group_name);
@@ -944,14 +976,12 @@ $('body').on('click', '.texteditor #colorpad a', function(event) {
     isSelectedColor = true;
     activeObj = canvas.getActiveObject();
 
-    if(activeObj.type =="image")
-    {
-     product.updateImageDesign(canvas.getActiveObject(),$('.texteditor .colorlayer').find('a.active').attr('data-id'),$(this).css('background-color'));
+    if (activeObj.type == "image") {
+        product.updateImageDesign(canvas.getActiveObject(), $('.texteditor .colorlayer').find('a.active').attr('data-id'), $(this).css('background-color'));
+    } else {
+        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
     }
-    else{
-     product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#fillcolor').css('background-color'),$('#strokecolor').css('background-color'));
-    }
-    
+
 });
 // Select a pattern in pattern pad.
 $('body').on('click', '.texteditor #patternpad a', function(event) {
@@ -959,20 +989,15 @@ $('body').on('click', '.texteditor #patternpad a', function(event) {
     $('.texteditor .colorlayer').find('a.active').css('background-image', $(this).css('background-image'));
     isSelectedColor = true;
     activeObj = canvas.getActiveObject();
-    if(activeObj.type =="image")
-    {
-     product.updateImageDesign(activeObj,$('.texteditor .colorlayer').find('a.active').attr('data-id'),$(this).next().attr('id'));
-    }
-    else{
-      if($('.texteditor .colorlayer').find('a.active').attr('id') == "fillcolor")
-      { 
-         product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
-      }
-      else if($('.texteditor .colorlayer').find('a.active').attr('id') == "strokecolor")
-      {
-        
-         product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#strokecolor').css('background-color'), $(this).next().attr('id'));
-      }
+    if (activeObj.type == "image") {
+        product.updateImageDesign(activeObj, $('.texteditor .colorlayer').find('a.active').attr('data-id'), $(this).next().attr('id'));
+    } else {
+        if ($('.texteditor .colorlayer').find('a.active').attr('id') == "fillcolor") {
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
+        } else if ($('.texteditor .colorlayer').find('a.active').attr('id') == "strokecolor") {
+
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#strokecolor').css('background-color'), $(this).next().attr('id'));
+        }
     }
 });
 // Select a color in color pad.
@@ -982,14 +1007,12 @@ $('body').on('click', '.cliparteditor #colorpad a', function(event) {
     isSelectedColor = true;
     activeObj = canvas.getActiveObject();
 
-    if(activeObj.type =="image")
-    {
-     product.updateImageDesign(canvas.getActiveObject(),$('.cliparteditor .colorlayer').find('a.active').attr('data-id'),$(this).css('background-color'));
+    if (activeObj.type == "image") {
+        product.updateImageDesign(canvas.getActiveObject(), $('.cliparteditor .colorlayer').find('a.active').attr('data-id'), $(this).css('background-color'));
+    } else {
+        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
     }
-    else{
-     product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#fillcolor').css('background-color'),$('#strokecolor').css('background-color'));
-    }
-    
+
 });
 // Select a pattern in pattern pad.
 $('body').on('click', '.cliparteditor #patternpad a', function(event) {
@@ -997,12 +1020,10 @@ $('body').on('click', '.cliparteditor #patternpad a', function(event) {
     $('.cliparteditor .colorlayer').find('a.active').css('background-image', $(this).css('background-image'));
     isSelectedColor = true;
     activeObj = canvas.getActiveObject();
-    if(activeObj.type =="image")
-    {
-     product.updateImageDesign(activeObj,$('.cliparteditor .colorlayer').find('a.active').attr('data-id'),$(this).next().attr('id'));
-    }
-    else{
-     product.updateTextDesign(activeObj,$('#dlFonts_form').val(),activeObj.text, $('#fillcolor').css('background-image'), $('#strokecolor').css('background-image'));
+    if (activeObj.type == "image") {
+        product.updateImageDesign(activeObj, $('.cliparteditor .colorlayer').find('a.active').attr('data-id'), $(this).next().attr('id'));
+    } else {
+        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-image'), $('#strokecolor').css('background-image'));
     }
 });
 
@@ -1011,11 +1032,11 @@ var ratio;
 var isChagingAngle = false;
 $('#clipart_angle_text, #clipart_angle_range').mousedown(function(event) {
     isChagingAngle = true;
-}).mousemove(function () {
-    if (! isChagingAngle) return;
+}).mousemove(function() {
+    if (!isChagingAngle) return;
 
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null) 
+    if (selectedObj == null)
         return;
 
     var val = parseInt($(this).val());
@@ -1032,12 +1053,12 @@ $('#clipart_angle_text, #clipart_angle_range').mousedown(function(event) {
 var isChagingWidth = false;
 $('#clipart_width_text, #clipart_width_range').mousedown(function(event) {
     isChagingWidth = true;
-}).mousemove(function () {
-    if (! isChagingWidth) return;
+}).mousemove(function() {
+    if (!isChagingWidth) return;
 
-    
+
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null) 
+    if (selectedObj == null)
         return;
 
     var val = parseFloat($(this).val());
@@ -1049,8 +1070,8 @@ $('#clipart_width_text, #clipart_width_range').mousedown(function(event) {
 
     selectedObj.setWidth(val);
     $('#clipart_width_text, #clipart_width_range').val(val);
-    canvas.renderAll();    
-    
+    canvas.renderAll();
+
 }).mouseup(function(event) {
     isChagingWidth = false;
 });
@@ -1061,10 +1082,10 @@ var isChagingHeight = false;
 $('#clipart_height_text, #clipart_height_range').mousedown(function(event) {
     isChagingHeight = true;
 }).mousemove(function(event) {
-    if (! isChagingHeight) return;
+    if (!isChagingHeight) return;
 
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null) 
+    if (selectedObj == null)
         return;
 
     var val = parseFloat($(this).val());
@@ -1076,7 +1097,7 @@ $('#clipart_height_text, #clipart_height_range').mousedown(function(event) {
     selectedObj.setHeight(val);
     $('#clipart_height_text, #clipart_height_range').val(val);
     canvas.renderAll();
-    
+
 }).mouseup(function(event) {
     isChagingHeight = false;
 });
@@ -1085,11 +1106,11 @@ $('#clipart_height_text, #clipart_height_range').mousedown(function(event) {
 // text rotate
 $('#clipart_rotate_text, #clipart_rotate_range').mousedown(function(event) {
     isChagingAngle = true;
-}).mousemove(function () {
-    if (! isChagingAngle) return;
+}).mousemove(function() {
+    if (!isChagingAngle) return;
 
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null) 
+    if (selectedObj == null)
         return;
     var val = parseInt($(this).val());
     selectedObj.setAngle(val);
@@ -1104,8 +1125,8 @@ $('#clipart_rotate_text, #clipart_rotate_range').mousedown(function(event) {
 // Text arc
 $('#clipart_arc_text, #clipart_arc_range').mousedown(function(event) {
     isChagingAngle = true;
-}).mousemove(function () {
-    if (! isChagingAngle) return;
+}).mousemove(function() {
+    if (!isChagingAngle) return;
 
     var selectedObj = canvas.getActiveObject();
     if (selectedObj == null)
@@ -1123,26 +1144,26 @@ $('#clipart_arc_text, #clipart_arc_range').mousedown(function(event) {
 // Text spacing
 $('#clipart_spacing_text, #clipart_spacing_range').mousedown(function(event) {
     isChagingAngle = true;
-}).mousemove(function () {
-    if (! isChagingAngle) return;
+}).mousemove(function() {
+    if (!isChagingAngle) return;
 
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null || selectedObj.getBoundingRectWidth() > canvas.width) 
+    if (selectedObj == null || selectedObj.getBoundingRectWidth() > canvas.width)
         return;
 
     var val = parseInt($(this).val());
     // selectedObj.set('spacing', val);
     var left = selectedObj.item(0).left;
-    for (var i = 0; i < selectedObj.size(); i ++) {
+    for (var i = 0; i < selectedObj.size(); i++) {
         selectedObj.item(i).left = left;
-        
+
         left += selectedObj.item(i).getWidth() + val * 1 / selectedObj.getScaleX();
     }
     _render(selectedObj);
 
     $('#clipart_spacing_text, #clipart_spacing_range').val(val);
 
-    
+
 }).mouseup(function(event) {
     isChagingAngle = false;
 });
@@ -1152,16 +1173,16 @@ $('#clipart_spacing_text, #clipart_spacing_range').mousedown(function(event) {
 var isChagingWidth = false;
 $('#clipart_stretch_text, #clipart_stretch_range').mousedown(function(event) {
     isChagingWidth = true;
-}).mousemove(function () {
-    if (! isChagingWidth) return;
+}).mousemove(function() {
+    if (!isChagingWidth) return;
 
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null) 
+    if (selectedObj == null)
         return;
 
     var val = parseFloat($(this).val());
     val = val * 10;
-    if(val > canvas.width)
+    if (val > canvas.width)
         val = canvas.width;
     selectedObj.scaleWidth(val);
     $('#clipart_stretch_text, #clipart_stretch_range').val(val);
@@ -1177,14 +1198,14 @@ var isChagingHeight = false;
 $('#clipart_lnheight_text, #clipart_lnheight_range').mousedown(function(event) {
     isChagingHeight = true;
 }).mousemove(function(event) {
-    if (! isChagingHeight) return;
+    if (!isChagingHeight) return;
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null) 
+    if (selectedObj == null)
         return;
 
     var val = parseFloat($(this).val());
     val = val * 5;
-    if(val > canvas.height)
+    if (val > canvas.height)
         val = canvas.height;
     selectedObj.scaleHeight(val);
     $('#clipart_lnheight_text, #clipart_lnheight_range').val(val);
@@ -1198,8 +1219,8 @@ $('#clipart_lnheight_text, #clipart_lnheight_range').mousedown(function(event) {
 // text size
 $('#clipart_size_text, #clipart_size_range').mousedown(function(event) {
     isChagingAngle = true;
-}).mousemove(function () {
-    if (! isChagingAngle) return;
+}).mousemove(function() {
+    if (!isChagingAngle) return;
 
     var selectedObj = canvas.getActiveObject();
     if (selectedObj == null)
@@ -1217,56 +1238,50 @@ $('#clipart_size_text, #clipart_size_range').mousedown(function(event) {
 
 $('.layer_up').click(function(event) {
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null) 
+    if (selectedObj == null)
         return;
     if (selectedObj) {
-              selectedObj.bringToFront();
-            }
+        selectedObj.bringToFront();
+    }
     //selectedObj.bringToFront();
-    
+
     // Update object tab
-    var id      = selectedObj.id;
-if(selectedObj.objType == "image")
-    {
-        var selLi   = $('#clipart_layer').find("[data-id='image_" + selectedObj.id + "']");    
+    var id = selectedObj.id;
+    if (selectedObj.objType == "image") {
+        var selLi = $('#clipart_layer').find("[data-id='image_" + selectedObj.id + "']");
+    } else {
+        var selLi = $('#clipart_layer').find("[data-id='text_" + selectedObj.id + "']");
     }
-    else
-    {
-        var selLi   = $('#clipart_layer').find("[data-id='text_" + selectedObj.id + "']");       
-    }
-    var prev    = selLi.prev();
+    var prev = selLi.prev();
     prev.before(selLi);
     canvas.renderAll();
 });
 
 $('.layer_down').click(function(event) {
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null) 
+    if (selectedObj == null)
         return;
-    
+
     if ($('#clipart_layer li:last-child').attr('data-id') == selectedObj.id)
         return;
     if (selectedObj) {
         selectedObj.sendToBack();
     }
 
-    var id      = selectedObj.id;
-    if(selectedObj.objType == "image")
-    {
-        var selLi   = $('#clipart_layer').find("[data-id='image_" + selectedObj.id + "']");    
+    var id = selectedObj.id;
+    if (selectedObj.objType == "image") {
+        var selLi = $('#clipart_layer').find("[data-id='image_" + selectedObj.id + "']");
+    } else {
+        var selLi = $('#clipart_layer').find("[data-id='text_" + selectedObj.id + "']");
     }
-    else
-    {
-        var selLi   = $('#clipart_layer').find("[data-id='text_" + selectedObj.id + "']");       
-    }
-    var next    = selLi.next();
+    var next = selLi.next();
     next.after(selLi);
     canvas.renderAll();
 });
 
 $('.position_center').click(function(event) {
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null) 
+    if (selectedObj == null)
         return;
 
     selectedObj.left = parseInt(canvas.getWidth() / 2, 10);
@@ -1275,7 +1290,7 @@ $('.position_center').click(function(event) {
 });
 
 
-$('#lock').click( function(event) {
+$('#lock').click(function(event) {
     if ($(this).attr('data-lock') == 'false') {
         $(this).attr('data-lock', 'true');
         $(this).css('background-position', '0 -3600px');
@@ -1286,104 +1301,113 @@ $('#lock').click( function(event) {
 });
 
 $('body').on('click', '#clipart_layer li', function(e) {
-  
+
     var data_id = $(this).attr('data-id');
     var res = data_id.split("_");
     var type = res[0];
     var id = res[1];
     $('#clipart_layer').find('li.active').removeClass('active');
     $('#clipart_layer').find("[data-id='" + data_id + "']").addClass('active');
-    for (var i = 0; i < canvas.getObjects().length; i ++) {
+    for (var i = 0; i < canvas.getObjects().length; i++) {
         if (canvas.item(i).id == id && canvas.item(i).objType == type) {
             canvas.setActiveObject(canvas.item(i));
             product.setSelectObj(canvas.item(i));
-            return;        
+            return;
         }
     }
 
 });
-var newplacement = null;
-$('.placement-modal .modal-body').on('click', 'div',function () {
-    if(product.Design_List.length>0)
-    {
-        for (var i =0 ; i<product.Design_List.length  ; i++) {
-            
-           if( product.Design_List[i].placementID == placementID)
-           {
-                product.Design_List[i].shapes.push(item);
-           }
-           else{
-                product.Design_List.push(product.addDesign_Object("","",placementID,item));
+$('#placement').click(function(e){
+   if (product.Design_List.length > 0) {
+      for (var i = 0; i < product.Design_List.length; i++) {
+
+        var pobj =  product.getPlacement(product.Design_List[i].placementID);
+        var overlaps = pobj.Overlap.split(",");
+        for (var i = 0; i < overlaps.length; i++) {
+         console.log(overlaps[i]);
+         $('.placement-modal .modal-body').children('div').each(function() {
+            if ($(this).children('img').attr('data-id') == overlaps[i]) {
+              $(this).children('img').css('opacity',0.3);
             }
+         });
+        
         }
+      
     }
-    else{
-        product.Design_List.push(product.addDesign_Object("","",placementID,item));
-
-    }
-
-    $('.placement-modal .modal-body').find('.active').removeClass('active');
+ }
+});
+$('.placement-modal .modal-body').on('click', 'div', function() {
+   $('.placement-modal .modal-body').find('.active').removeClass('active');
     $(this).addClass('active');
-    newplacement = $(this);
-
-})
-
+   
+    
+});
+$("#tbx").on('input', function(e){
+   activeObj = canvas.getActiveObject();
+   product.updateTextDesign(activeObj,$('#dlFonts_form').val(),$(this).val(),$('#fillcolor').css('background-color'),$('#strokecolor').css('background-color'));
+   $('.texteditor').show();
+});
 $('#select_placement').click(function(event) {
-    var click_product = {
-        ID : newplacement.children('img').attr('data-id'),
-        Name : newplacement.children('img').attr('data-name'),
-        Overlap : newplacement.children('img').attr('data-overlap'),
-        Width : newplacement.children('img').attr('data-width'),
-        Height : newplacement.children('img').attr('data-height'),
-        PreviewImage : newplacement.children('img').attr('src')
+    var pobj = product.getPlacement($('.placement-modal .modal-body').find('.active').children('img').attr('data-id'));
+    if (product.Design_List.length > 0) {
+
+         if($('.placement-modal .modal-body').find('.active').children('img').css('opacity')==0.3)
+         {
+            alert("Please select other placement.");
+            return;
+               } 
+         else {
+            product.addPlacement(pobj.Name, pobj.PreviewImage, pobj.ID);
+         }
+        
+    } else {
+        product.addPlacement(pobj.Name, pobj.PreviewImage, pobj.ID);
     }
-    product.Designs.placement.push(click_product);
-    $('#placement').attr('src', newplacement.children('img').attr('src'));
+
+    $('#placement').attr('src', $('.placement-modal .modal-body').find('.active').children('img').attr('src'));
     $('.placement-modal .close').click();
-    drawGrayGrid(newplacement.children('img').attr('data-width'),newplacement.children('img').attr('data-height'));
+    drawGrayGrid($('.placement-modal .modal-body').find('.active').children('img').attr('data-width'), $('.placement-modal .modal-body').find('.active').children('img').attr('data-height'));
 });
 
 function updateControls() {
     var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null) 
+    if (selectedObj == null)
         return;
 
-	if(selectedObj.objType == "image")
-    {
+    if (selectedObj.objType == "image") {
         $('#clipart_width_text, #clipart_width_range').val(selectedObj.getWidth());
         $('#clipart_height_text, #clipart_height_range').val(selectedObj.getHeight());
-        $('#clipart_angle_text, #clipart_angle_range').val(selectedObj.getAngle());       
-    }
-    else
-    {
+        $('#clipart_angle_text, #clipart_angle_range').val(selectedObj.getAngle());
+    } else {
         $('#clipart_stretch_text, #clipart_stretch_range').val(selectedObj.getWidth());
         $('#clipart_lnheight_text, #clipart_lnheight_range').val(selectedObj.getHeight());
-        $('#clipart_rotate_text, #clipart_rotate_range').val(selectedObj.getAngle());    
+        $('#clipart_rotate_text, #clipart_rotate_range').val(selectedObj.getAngle());
     }
     // ratio = selectedObj.getWidth() / selectedObj.getHeight();
 }
 
 // Handle canvas event
 canvas.on({
-    'object:modified':      checkText,
-    'object:resizing':      updateControls,
-    'object:rotating':      updateControls,
-    'object:scaling':       updateControls,
-    'object:removed':       updatelayersection,
-    'selection:cleared':    removeEditPanel,  
-    'object:moving':        grayCanvasBound,       
-    "mouse:down":   function (e) {
-                        var selectedObj = canvas.getActiveObject();
-                        if (selectedObj == null) 
-                        return; 
-                        activeObj = selectedObj;      
-                        product.setSelectObj(selectedObj);
-                    },
-    "mouse:move":   function(e){
+    'object:modified': checkText,
+    'object:resizing': updateControls,
+    'object:rotating': updateControls,
+    'object:scaling': updateControls,
+    'object:removed': updatelayersection,
+    'selection:cleared': removeEditPanel,
+    'object:moving': grayCanvasBound,
+    "mouse:down": function(e) {
+        var selectedObj = canvas.getActiveObject();
+        if (selectedObj == null)
+            return;
+        activeObj = selectedObj;
+        product.setSelectObj(selectedObj);
+    },
+    "mouse:move": function(e) {
 
     }
 });
-function grayCanvasBound(){
+
+function grayCanvasBound() {
     var selectedObj = canvas.getActiveObject();
     lpos = selectedObj.getBoundingRect().left;
     tpos = selectedObj.getBoundingRect().top;
@@ -1393,7 +1417,7 @@ function grayCanvasBound(){
     // graytly = gridtp;
     // graywidth = w;
     // grayheight = h;
-   // if((graytlx>lpos && graytly<tpos) || (graytlx+graywidth>lpos+gwidth && graytly+grayheight<tpos+gheight) || )
+    // if((graytlx>lpos && graytly<tpos) || (graytlx+graywidth>lpos+gwidth && graytly+grayheight<tpos+gheight) || )
     //if(selectedObj)
 }
 
@@ -1403,39 +1427,35 @@ function checkText(e) {
     var b = e.target;
     var c = this;
     var selectedObj = canvas.getActiveObject();
-    var ratio = selectedObj.getWidth()/selectedObj.getHeight();
+    var ratio = selectedObj.getWidth() / selectedObj.getHeight();
     var selectedObjId = selectedObj.id;
-    
-    if(selectedObj.objType == "image")
-    {
+
+    if (selectedObj.objType == "image") {
         var cid = 'image_' + selectedObjId;
-    }
-    else{
+    } else {
         var cid = 'text_' + selectedObjId;
     }
     var angle = selectedObj.getAngle();
-    if(ratio>1)
-    {
-        $('#'+cid).css('transform','rotate('+angle+'deg) scale(1,'+1/ratio+')');
+    if (ratio > 1) {
+        $('#' + cid).css('transform', 'rotate(' + angle + 'deg) scale(1,' + 1 / ratio + ')');
+    } else {
+        $('#' + cid).css('transform', 'rotate(' + angle + 'deg) scale(' + ratio + ',1)');
     }
-    else{
-        $('#'+cid).css('transform','rotate('+angle+'deg) scale('+ratio+',1)');
-    }   
 
 }
 
 function updatelayersection() {
-    if ( ! isSelectedColor) {
+    if (!isSelectedColor) {
         $('.colortab_custom').hide();
 
         if (activeObj.objType == 'image') {
-            $('#clipart_layer').find("[data-id='image_" + activeObj.id + "']").remove();   
+            $('#clipart_layer').find("[data-id='image_" + activeObj.id + "']").remove();
         } else {
             $('#clipart_layer').find("[data-id='text_" + activeObj.id + "']").remove();
-        } 
-        
+        }
+
         removeobj = 1;
-     //   console.log(isSelectedColor);
+        //   console.log(isSelectedColor);
     }
 
     isSelectedColor = false;
@@ -1443,29 +1463,29 @@ function updatelayersection() {
 
 function removeEditPanel() {
 
-    if ( ! isSelectedColor) {
-        $(".colortab_custom").hide();    
+    if (!isSelectedColor) {
+        $(".colortab_custom").hide();
     }
 }
-$('#addText').click(function(){
+$('#addText').click(function() {
     $('#tbxbefore').val('');
     $('.colortab_custom').show();
     $('.edittextbox').show();
     $('.cliparteditor').hide();
     $('.texteditor').hide();
 })
-$('#gotext').click(function(){
+$('#gotext').click(function() {
     $('.edittextbox').hide();
     $('#tbx').val($('#tbxbefore').val());
     $('.texteditor').show();
-    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2,$("#fillcolor").css("background-color"),$("#strokecolor").css("background-color"),1);
-    
+    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, $("#fillcolor").css("background-color"), $("#strokecolor").css("background-color"), 1);
+
     $('cliparteditor').hide();
 });
 var p_flag = 0;
 var isaddtext = 0;
 $(document).ready(function() {
-    
+    product = new Product();
     $('#placement').click();
     $('.secondp').hide();
     $(".tabcontent").children().hide();
@@ -1476,38 +1496,38 @@ $(document).ready(function() {
     isaddtext = 0;
     $('.tab_custom').height($('.colortab_custom').height());
     var acc = document.getElementsByClassName("accordion");
+    var accc = document.getElementsByClassName("accordion1");
     acc[0].classList.toggle("active");
     acc[0].nextElementSibling.classList.toggle("show");
+    accc[0].classList.toggle("active");
+    accc[0].nextElementSibling.classList.toggle("show");
 });
 
-// $('.accordion').click(function(e){
-//     $('.tab_custom').height($('.colortab_custom').height());
-// });
-$('body').on('click','#listClipArt li',function(event) { 
+$('body').on('click', '#listClipArt li', function(event) {
     //console.log($(this).html());
     $('.edittextbox').hide();
-    drawClipArt($(this).attr('id'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2,1);
+    drawClipArt($(this).attr('id'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, 1);
 });
-$('#dlFonts_form').change(function(){
-        //   drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);        
-    if(canvas.getActiveObject().objType == "text")
-    {
+$('#dlFonts_form').change(function() {
+    //   drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);        
+    if (canvas.getActiveObject().objType == "text") {
         //drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);   
         updateCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);
     }
 });
 
-$('body').on('click','.colorpicker',function(e) {
+$('body').on('click', '.colorpicker', function(e) {
     $('.firstp').hide();
     $('.secondp').show();
     $('.tab_custom').css("height", $('.colortab_custom').css("height"));
 });
 
-$('body').on('click','.closebtn',function(e) {
+$('body').on('click', '.closebtn', function(e) {
     $('.secondp').hide();
     $('.firstp').show();
 });
 var acc = document.getElementsByClassName("accordion");
+var accc = document.getElementsByClassName("accordion1");
 var i;
 
 for (i = 0; i < acc.length; i++) {
@@ -1516,7 +1536,17 @@ for (i = 0; i < acc.length; i++) {
         $('.secondp').find('.accordion').removeClass('active');
         $('.secondp').find('.panel').removeClass('show');
         this.classList.toggle("active");
-        
+
+        this.nextElementSibling.classList.toggle("show");
+    }
+}
+for (i = 0; i < accc.length; i++) {
+    accc[i].onmousedown = function() {
+        $('.tab_custom').height();
+        $('.secondp').find('.accordion1').removeClass('active');
+        $('.secondp').find('.panel1').removeClass('show');
+        this.classList.toggle("active");
+
         this.nextElementSibling.classList.toggle("show");
     }
 }
