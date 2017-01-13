@@ -119,6 +119,9 @@ Product.prototype.setSelectObj = function(item) {
         $('.cliparteditor .colorlayer').html(html);
         $('.cliparteditor .colorlayer').find('a.active').removeClass('active');
         $('.cliparteditor .colorlayer').find("[data-id='" + i + "']").addClass('active');
+        $('.cliparteditor .firstp').show();
+        $('.cliparteditor .secondp').hide();
+        $('.edittextbox').hide();
         $('#clipart_width_text,  #clipart_width_range').val(parseFloat(item.getWidth()));
         $('#clipart_height_text, #clipart_height_range').val(parseFloat(item.getHeight()));
         $('#clipart_angle_text,  #clipart_angle_range').val(item.getAngle());
@@ -178,6 +181,9 @@ Product.prototype.setSelectObj = function(item) {
         $('#clipart_height_text, #clipart_height_range').prop('disabled', false);
         $('#fillcolor').css('background-color', item.fillColor);
         $('#strokecolor').css('background-color', item.strokeColor);
+        $('.texteditor .firstp').show();
+        $('.texteditor .secondp').hide();
+        $('.edittextbox').hide();
     }
 };
 Product.prototype.updateImageDesign = function(item, i, colorstr) {
@@ -228,12 +234,13 @@ Product.prototype.updateImageDesign = function(item, i, colorstr) {
     myctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, 35, 35);
 
 };
-Product.prototype.updateTextDesign = function(item, fontid, str, fillcolor, strokecolor,spacing) {
+Product.prototype.updateTextDesign = function(item, fontid, str, fillcolor, strokecolor) {
     if (item == null) {
         alert('Please select a Object.');
         return;
     }
-    var changeitem = getCharacters(fontid, item.text, fillcolor, strokecolor, spacing);
+    var that = $('#clipart_layer').find('#text_' + item.id);
+    var changeitem = getCharacters(fontid, item.text, fillcolor, strokecolor, that , item.left,item.top,item.height);
 
     changeitem.set('id', item.id);
     changeitem.set('objType', 'text');
@@ -241,12 +248,13 @@ Product.prototype.updateTextDesign = function(item, fontid, str, fillcolor, stro
     changeitem.set('strokeColor', strokecolor);
     changeitem.set('text', str);
     changeitem.set('placementID', item.placementID);
+    changeitem.set('width',item.getWidth());
+    changeitem.set('height',item.getHeight());
     changeitem.scale(0.1);
     changeitem.sizelock = false;
     //_render(item);
     canvas.remove(item);
     canvas.add(changeitem);
-
     // preview image
     canvas.setActiveObject(changeitem);
     product.setSelectObj(changeitem);
@@ -264,7 +272,7 @@ Product.prototype.updateTextDesign = function(item, fontid, str, fillcolor, stro
     }
     // $('#clipart_layer').find('li.active').removeClass('active');
     // $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
-    $('#clipart_layer').find('#text_' + changeitem.id).attr('src', changeitem.toDataURL('png'));
+    
 
 }
 var product;
@@ -427,7 +435,14 @@ function getCanvasObjects(data_array, objtype) {
             }
 
             if (g.Stroke != undefined) {
-                ctx.strokeStyle = g.Stroke.HtmlColor;
+               if (g.Stroke.HtmlColor.indexOf('img_pattern') != -1) {
+
+                    var image = document.getElementById(g.Stroke.HtmlColor);
+                    ctx.strokeStyle = ctx.createPattern(image, "repeat");
+                } else {
+                    ctx.strokeStyle = g.Stroke.HtmlColor.replace(new RegExp("'", 'g'), "");
+                }
+                //ctx.strokeStyle = g.Stroke.HtmlColor;
                 ctx.lineWidth = g.StrokeWidth;
                 ctx.stroke();
                 if (log) {
@@ -445,13 +460,15 @@ function getCanvasObjects(data_array, objtype) {
     return (cTemp);
 }
 
-function getCharacters(fontid, characters, fillcolorstr, strokecolor, spacing) {
+function getCharacters(fontid, characters, fillcolorstr, strokecolor, $that,l,t,h) {
     var cliparts = [];
     var left = canvas.width / 2;
+    console.log(l+"_"+t+"_"+h);
     var height = 0;
-    console.log(fillcolorstr);
-    // console.log(fonts[fontid]);
-
+    var mycanvas = document.getElementById($that.attr('id'));
+    var myctx    = mycanvas.getContext('2d');
+    //myctx.drawImage(item, 0, 0, item.width, source.height, 0, 0, 35, 35);
+    var sourcel = 35/characters.length;
     for (var i = 0; i < characters.length; i++) {
         for (var j = 0; j < fonts[fontid].Characters.length; j++) {
 
@@ -460,32 +477,45 @@ function getCharacters(fontid, characters, fillcolorstr, strokecolor, spacing) {
                 HtmlColor: strokecolor,
                 Pattern: ""
             };
+            var sc = c.CanvasObject.Width/c.CanvasObject.Height;
+            console.log(c.CanvasObject.Width+"_"+c.CanvasObject.Height);
             c.CanvasObject.Groups[0].Fill.HtmlColor = fillcolorstr;
-
-            console.log(c);
             if (c.Character == characters[i]) {
+               
+               if(h==0)
+               {
+                  h = c.CanvasObject.Height;
+                  w = h*sc;
+               }
+               else{
+                  w = h*sc;
+
+               }
+               console.log(w+"_"+h);
                 if (c.CanvasObject.Height > height) {
                     height = c.CanvasObject.Height;
 
                 }
                 c.CanvasObject.Groups[0].StrokeWidth = 20;
+                var source = getCanvasObjects([c.CanvasObject],"text");
+                myctx.drawImage(source, 0, 0, source.width, source.height, (35/characters.length)*(i), 0, 35/characters.length, 35);
                 cliparts.push(new fabric.Image(getCanvasObjects([c.CanvasObject], "text"), {
                     left: left,
                     top: canvas.height / 2,
                     originX: 'left',
                     originY: 'bottom',
-                    width: c.CanvasObject.Width,
-                    height: c.CanvasObject.Height,
+                    width: w,
+                    height: h,
                 }));
-                left += c.CanvasObject.Width + spacing;
+                left += c.CanvasObject.Width + 2;
                 break;
             }
         }
     }
 
     var grp = new fabric.Group(cliparts, {
-        left: canvas.width / 2,
-        top: canvas.height / 2,
+        left: l,
+        top: t,
     });
     return grp;
 }
@@ -539,12 +569,15 @@ function _render(source) {
     canvas.renderAll();
 }
 
-function drawCharacters(fontid, $that, x, y, fillcolorstr, strokecolorstr, placementID,spacing) {
+function drawCharacters(fontid, $that, x, y, fillcolorstr, strokecolorstr, placementID) {
     var characters = $that.val();
     if (characters.length == 0)
         return;
     var id = product.getID();
-    var item = getCharacters(fontid, characters, fillcolorstr, strokecolorstr,spacing);
+    $('#clipart_layer').find('li.active').removeClass('active');
+    $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><canvas width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></canvas></a></li>');
+    var item = getCharacters(fontid, characters, fillcolorstr, strokecolorstr, $('#text_'+id),x,y,0);
+    console.log(item.getWidth()+"*"+item.getHeight());
     // console.log(item);
     item.set('id', id);
     item.set('objType', 'text');
@@ -552,6 +585,8 @@ function drawCharacters(fontid, $that, x, y, fillcolorstr, strokecolorstr, place
     item.set('strokeColor', strokecolorstr);
     item.set('text', characters);
     item.set('placementID', placementID);
+    item.set('width',item.getWidth());
+    item.set('height',item.getHeight());
     item.scale(0.1);
     item.sizelock = false;
     _render(item);
@@ -570,10 +605,12 @@ function drawCharacters(fontid, $that, x, y, fillcolorstr, strokecolorstr, place
         product.Design_List.push(product.addDesign_Object("", "", placementID, item));
     }
     canvas.setActiveObject(item);
+    $('#clipart_stretch_text, #clipart_stretch_range').val(item.getWidth());
+    $('#clipart_lnheight_text, #clipart_lnheight_range').val(item.getHeight());
+    $('#clipart_rotate_text, #clipart_rotate_range').val(item.getAngle());
     // object layer
-    $('#clipart_layer').find('li.active').removeClass('active');
-    $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><image width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
-    $('#clipart_layer').find('#text_' + item.id).attr('src', item.toDataURL('png'));
+    
+    //$('#clipart_layer').find('#text_' + item.id).attr('src', item.toDataURL('png'));
     //var imagecanvas_ = new fabric.Canvas('imageCanvas');
     // var cid = item.objType + '_' + item.id; 
     // var mycanvas = document.getElementById(cid);
@@ -788,7 +825,7 @@ function drawGrid() {
     var groupArray = [];
     // to manipulate grid after creation
 
-    var gridSize = 20; // define grid size
+    var gridSize = 10; // define grid size
 
     // define presentation option of grid
     var lineOption = {
@@ -977,7 +1014,28 @@ $('body').on('click', '.texteditor #colorpad a', function(event) {
     if (activeObj.type == "image") {
         product.updateImageDesign(canvas.getActiveObject(), $('.texteditor .colorlayer').find('a.active').attr('data-id'), $(this).css('background-color'));
     } else {
-        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'),$('#clipart_arc_range').val());
+        if ($('#fillcolor').css('background-image') == "none") {
+         if($('#strokecolor').css('background-image') == "none")
+         {
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
+         }
+         else{
+         
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $(this).next().attr('id'));
+         }
+            
+        } 
+        if ($('#fillcolor').css('background-image') != "none") {
+         if($('#strokecolor').css('background-image') == "none")
+         {
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
+         }
+         else{
+         
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $(this).next().attr('id'));
+         }
+            
+        }  
     }
 
 });
@@ -990,12 +1048,28 @@ $('body').on('click', '.texteditor #patternpad a', function(event) {
     if (activeObj.type == "image") {
         product.updateImageDesign(activeObj, $('.texteditor .colorlayer').find('a.active').attr('data-id'), $(this).next().attr('id'));
     } else {
-        if ($('.texteditor .colorlayer').find('a.active').attr('id') == "fillcolor") {
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'),$('#clipart_arc_range').val());
-        } else if ($('.texteditor .colorlayer').find('a.active').attr('id') == "strokecolor") {
-
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#strokecolor').css('background-color'), $(this).next().attr('id'),$('#clipart_arc_range').val());
-        }
+        if ($('#fillcolor').css('background-image') == "none") {
+         if($('#strokecolor').css('background-image') == "none")
+         {
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
+         }
+         else{
+         
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $(this).next().attr('id'));
+         }
+            
+        } 
+        if ($('#fillcolor').css('background-image') != "none") {
+         if($('#strokecolor').css('background-image') == "none")
+         {
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
+         }
+         else{
+         
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $(this).next().attr('id'));
+         }
+            
+        }  
     }
 });
 // Select a color in color pad.
@@ -1008,7 +1082,7 @@ $('body').on('click', '.cliparteditor #colorpad a', function(event) {
     if (activeObj.type == "image") {
         product.updateImageDesign(canvas.getActiveObject(), $('.cliparteditor .colorlayer').find('a.active').attr('data-id'), $(this).css('background-color'));
     } else {
-        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'),$('#clipart_arc_range').val());
+        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
     }
 
 });
@@ -1021,7 +1095,7 @@ $('body').on('click', '.cliparteditor #patternpad a', function(event) {
     if (activeObj.type == "image") {
         product.updateImageDesign(activeObj, $('.cliparteditor .colorlayer').find('a.active').attr('data-id'), $(this).next().attr('id'));
     } else {
-        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-image'), $('#strokecolor').css('background-image'),$('#clipart_arc_range').val());
+        product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-image'), $('#strokecolor').css('background-image'));
     }
 });
 
@@ -1061,7 +1135,7 @@ $('#clipart_width_text, #clipart_width_range').mousedown(function(event) {
 
     var val = parseFloat($(this).val());
     //console.log(ratio);
-    if ($('#lock').attr('data-lock') == 'true') {
+    if ($('.cliparteditor #lock').attr('data-lock') == 'true') {
         selectedObj.setHeight(val / ratio);
         $('#clipart_height_text, #clipart_height_range').val(val / ratio);
     }
@@ -1088,7 +1162,7 @@ $('#clipart_height_text, #clipart_height_range').mousedown(function(event) {
 
     var val = parseFloat($(this).val());
     //console.log(canvas);
-    if ($('#lock').attr('data-lock') == 'true') {
+    if ($('.cliparteditor #lock').attr('data-lock') == 'true') {
         selectedObj.setWidth(val * ratio);
         $('#clipart_width_text, #clipart_width_range').val(val * ratio);
     }
@@ -1137,10 +1211,10 @@ $('#clipart_arc_text, #clipart_arc_range').mousedown(function(event) {
 }).mouseup(function(event) {
     isChagingAngle = false;
      if ($('.texteditor .colorlayer').find('a.active').attr('id') == "fillcolor") {
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'),$('#clipart_arc_range').val());
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
         } else if ($('.texteditor .colorlayer').find('a.active').attr('id') == "strokecolor") {
 
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#strokecolor').css('background-color'), $(this).next().attr('id'),$('#clipart_arc_range').val());
+            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#strokecolor').css('background-color'), $(this).next().attr('id'));
         }
 });
 
@@ -1185,11 +1259,15 @@ $('#clipart_stretch_text, #clipart_stretch_range').mousedown(function(event) {
         return;
 
     var val = parseFloat($(this).val());
-    val = val * 10;
     if (val > canvas.width)
         val = canvas.width;
     selectedObj.scaleWidth(val);
     $('#clipart_stretch_text, #clipart_stretch_range').val(val);
+    if ($('.texteditor #lock').attr('data-lock') == 'true')
+    {
+       $('#clipart_lnheight_text, #clipart_lnheight_range').val(val);
+       selectedObj.scaleHeight(val);
+   }
     _render(selectedObj);
 
 }).mouseup(function(event) {
@@ -1208,11 +1286,16 @@ $('#clipart_lnheight_text, #clipart_lnheight_range').mousedown(function(event) {
         return;
 
     var val = parseFloat($(this).val());
-    val = val * 5;
     if (val > canvas.height)
         val = canvas.height;
     selectedObj.scaleHeight(val);
     $('#clipart_lnheight_text, #clipart_lnheight_range').val(val);
+    if ($('.texteditor #lock').attr('data-lock') == 'true')
+    {
+       selectedObj.scaleWidth(val);
+       $('#clipart_stretch_text, #clipart_stretch_range').val(val);
+   }
+    selectedObj.scaleHeight(val);
     _render(selectedObj);
 
 }).mouseup(function(event) {
@@ -1245,6 +1328,7 @@ $('.layer_up').click(function(event) {
     if (selectedObj == null)
         return;
     if (selectedObj) {
+
         selectedObj.bringToFront();
     }
     //selectedObj.bringToFront();
@@ -1265,9 +1349,12 @@ $('.layer_down').click(function(event) {
     var selectedObj = canvas.getActiveObject();
     if (selectedObj == null)
         return;
-
-    if ($('#clipart_layer li:last-child').attr('data-id') == selectedObj.id)
+     console.log($('#clipart_layer li:last-child').attr('data-id')+"_"+selectedObj.id);
+     var as = $('#clipart_layer li:last-child').attr('data-id').split("_");
+    if (as[1] == selectedObj.id)
+     {    alert(1);
         return;
+    }
     if (selectedObj) {
         selectedObj.sendToBack();
     }
@@ -1294,7 +1381,16 @@ $('.position_center').click(function(event) {
 });
 
 
-$('#lock').click(function(event) {
+$('.texteditor #lock').click(function(event) {
+    if ($(this).attr('data-lock') == 'false') {
+        $(this).attr('data-lock', 'true');
+        $(this).css('background-position', '0 -3600px');
+    } else {
+        $(this).attr('data-lock', 'false');
+        $(this).css('background-position', '0 -3650px');
+    }
+});
+$('.cliparteditor #lock').click(function(event) {
     if ($(this).attr('data-lock') == 'false') {
         $(this).attr('data-lock', 'true');
         $(this).css('background-position', '0 -3600px');
@@ -1348,8 +1444,58 @@ $('.placement-modal .modal-body').on('click', 'div', function() {
 });
 $("#tbx").on('input', function(e){
    activeObj = canvas.getActiveObject();
-   product.updateTextDesign(activeObj,$('#dlFonts_form').val(),$(this).val(),$('#fillcolor').css('background-color'),$('#strokecolor').css('background-color'),$('#clipart_arc_range').val());
-   $('.texteditor').show();
+   isSelectedColor = true;
+   if ($('#fillcolor').css('background-image') == "none") {
+      if($('#strokecolor').css('background-image') == "none")
+      {
+         product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
+      }
+      else{
+      
+         product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $('#fillcolor').css('background-color'), $(this).next().attr('id'));
+      }
+         
+   } 
+   if ($('#fillcolor').css('background-image') != "none") {
+      if($('#strokecolor').css('background-image') == "none")
+      {
+         product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $(this).next().attr('id'), $('#strokecolor').css('background-color'));
+      }
+      else{
+      
+         product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $(this).next().attr('id'), $(this).next().attr('id'));
+      }
+      
+  }  
+   
+});
+$('#dlFonts_form').change(function() {
+   activeObj = canvas.getActiveObject();
+   isSelectedColor = true;
+   if ($('#fillcolor').css('background-image') == "none") {
+      if($('#strokecolor').css('background-image') == "none")
+      {
+         product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
+      }
+      else{
+      
+         product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $('#fillcolor').css('background-color'), $(this).next().attr('id'));
+      }
+            
+   } 
+   if ($('#fillcolor').css('background-image') != "none") {
+      if($('#strokecolor').css('background-image') == "none")
+      {
+         product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $(this).next().attr('id'), $('#strokecolor').css('background-color'));
+      }
+      else{
+      
+         product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $(this).next().attr('id'), $(this).next().attr('id'));
+      }
+      
+  }        
+        
+    
 });
 $('#select_placement').click(function(event) {
     var pobj = product.getPlacement($('.placement-modal .modal-body').find('.active').children('img').attr('data-id'));
@@ -1482,7 +1628,7 @@ $('#gotext').click(function() {
     $('.edittextbox').hide();
     $('#tbx').val($('#tbxbefore').val());
     $('.texteditor').show();
-    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, $("#fillcolor").css("background-color"), $("#strokecolor").css("background-color"), 1,1);
+    drawCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, $("#fillcolor").css("background-color"), $("#strokecolor").css("background-color"), 1);
 
     $('cliparteditor').hide();
 });
@@ -1510,17 +1656,35 @@ $('body').on('click', '#listClipArt li', function(event) {
     $('.edittextbox').hide();
     drawClipArt($(this).attr('id'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, 1);
 });
-$('#dlFonts_form').change(function() {
-         
-    if (canvas.getActiveObject().objType == "text") {
-        updateCharacters($('#dlFonts_form').val(), $('#tbx'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2);
-    }
-});
 
-$('body').on('click', '.colorpicker', function(e) {
-    $('.firstp').hide();
-    $('.secondp').show();
-    $('.tab_custom').css("height", $('.colortab_custom').css("height"));
+
+$('body').on('click', '.cliparteditor .colorpicker', function(e) {
+  if($('.cliparteditor .firstp').css("display") == "none")
+ {
+   
+   $('.cliparteditor .firstp').show();
+   $('.cliparteditor .secondp').hide();
+ }
+   else if ($('.cliparteditor .firstp').css("display") == "block")
+{
+   $('.cliparteditor .firstp').hide();
+   $('.cliparteditor .secondp').show();
+}
+ $('.tab_custom').css("height", $('.colortab_custom').css("height"));
+});
+$('body').on('click', '.texteditor .colorpicker', function(e) {
+  if($('.texteditor .firstp').css("display") == "none")
+ {
+   
+   $('.texteditor .firstp').show();
+   $('.texteditor .secondp').hide();
+ }
+   else if ($('.texteditor .firstp').css("display") == "block")
+{
+   $('.texteditor .firstp').hide();
+   $('.texteditor .secondp').show();
+}
+ $('.tab_custom').css("height", $('.colortab_custom').css("height"));
 });
 
 $('body').on('click', '.closebtn', function(e) {
