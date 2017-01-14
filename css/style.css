@@ -205,6 +205,13 @@ select.prod-sort {
     cursor: pointer;
     color:#65a575;
 }
+.selectdesign{
+    background-color: rgba(255,35,35,0.2);
+}
+.selectdesign:hover{
+    background-color: rgba(255,35,35,0.2);
+    cursor:pointer;
+}
 .editcolor {
 	border:1px solid #dcdcdc;
     padding-left: 0px;
