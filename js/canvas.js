@@ -392,7 +392,7 @@ Product.prototype.drawClipArt = function(clipartid, x, y, placementID , pitem) {
                 product.setSelectObj(item);
             }
         },
-        async: false
+        async: true
     });
 }
 Product.prototype.updateImageDesign = function(item, is, colorstr) {
@@ -1083,13 +1083,10 @@ $('body').on('click', '.texteditor #colorpad a', function(event) {
          }
 
      }
-     if ($('#fillcolor').css('background-image') != "none") {
+     else if ($('#fillcolor').css('background-image') != "none") {
          if ($('#strokecolor').css('background-image') == "none") {
              product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
-         } else {
-
-             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $(this).next().attr('id'));
-         }
+         } 
 
      }
 
@@ -1098,23 +1095,21 @@ $('body').on('click', '.texteditor #colorpad a', function(event) {
 $('body').on('click', '.texteditor #patternpad a', function(event) {
     $('.texteditor .colorlayer').find('a.active').css('background-color', '');
     $('.texteditor .colorlayer').find('a.active').css('background-image', $(this).css('background-image'));
+    $('.texteditor .colorlayer').find('a.active').attr('data-id', $(this).next().attr('id'));
     isSelectedColor = true;
     activeObj = canvas.getActiveObject();
      if ($('#fillcolor').css('background-image') == "none") {
-         if ($('#strokecolor').css('background-image') == "none") {
-             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
-         } else {
-
-             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $(this).next().attr('id'));
+         if ($('#strokecolor').css('background-image') != "none") {
+              product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').attr('data-id'));
          }
 
      }
-     if ($('#fillcolor').css('background-image') != "none") {
+     else if ($('#fillcolor').css('background-image') != "none") {
          if ($('#strokecolor').css('background-image') == "none") {
              product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
          } else {
-
-             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $(this).next().attr('id'));
+             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').attr('data-id'), $('#strokecolor').attr('data-id'));
+            
          }
 
      }
@@ -1158,6 +1153,7 @@ $('#clipart_angle_text, #clipart_angle_range').mousedown(function(event) {
     canvas.renderAll();
 }).mouseup(function(event) {
     isChagingAngle = false;
+    checkText();
 });
 
 // ---------------------------------------------------------------------------
@@ -1185,6 +1181,7 @@ $('#clipart_width_text, #clipart_width_range').mousedown(function(event) {
 
 }).mouseup(function(event) {
     isChagingWidth = false;
+    checkText();
 });
 
 // ---------------------------------------------------------------------------
@@ -1210,6 +1207,7 @@ $('#clipart_height_text, #clipart_height_range').mousedown(function(event) {
 
 }).mouseup(function(event) {
     isChagingHeight = false;
+    checkText();
 });
 
 // ---------------------------------------------------------------------------
@@ -1229,6 +1227,7 @@ $('#clipart_rotate_text, #clipart_rotate_range').mousedown(function(event) {
     canvas.renderAll();
 }).mouseup(function(event) {
     isChagingAngle = false;
+    checkText();
 });
 
 // ---------------------------------------------------------------------------
@@ -1254,6 +1253,7 @@ $('#clipart_arc_text, #clipart_arc_range').mousedown(function(event) {
 
         product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#strokecolor').css('background-color'), $(this).next().attr('id'));
     }
+    checkText();
 });
 
 // ---------------------------------------------------------------------------
@@ -1282,11 +1282,11 @@ $('#clipart_spacing_text, #clipart_spacing_range').mousedown(function(event) {
 
 }).mouseup(function(event) {
     isChagingAngle = false;
+    checkText();
 });
 
 // ---------------------------------------------------------------------------
 // Text stretch
-var isChagingWidth = false;
 $('#clipart_stretch_text, #clipart_stretch_range').mousedown(function(event) {
     isChagingWidth = true;
 }).mousemove(function() {
@@ -1309,11 +1309,11 @@ $('#clipart_stretch_text, #clipart_stretch_range').mousedown(function(event) {
 
 }).mouseup(function(event) {
     isChagingWidth = false;
+    checkText();
 });
 
 // ---------------------------------------------------------------------------
 // Text lnheight
-var isChagingHeight = false;
 $('#clipart_lnheight_text, #clipart_lnheight_range').mousedown(function(event) {
     isChagingHeight = true;
 }).mousemove(function(event) {
@@ -1336,29 +1336,8 @@ $('#clipart_lnheight_text, #clipart_lnheight_range').mousedown(function(event) {
 
 }).mouseup(function(event) {
     isChagingHeight = false;
+    checkText();
 });
-
-// ---------------------------------------------------------------------
-// text size
-$('#clipart_size_text, #clipart_size_range').mousedown(function(event) {
-    isChagingAngle = true;
-}).mousemove(function() {
-    if (!isChagingAngle) return;
-
-    var selectedObj = canvas.getActiveObject();
-    if (selectedObj == null)
-        return;
-
-    var val = parseInt($(this).val());
-    selectedObj.scale(val);
-    $('#clipart_size_text, #clipart_size_range').val(val);
-
-    canvas.renderAll();
-}).mouseup(function(event) {
-    isChagingAngle = false;
-});
-
-
 $('.layer_up').click(function(event) {
     var selectedObj = canvas.getActiveObject();
     if (selectedObj == null)
@@ -1366,6 +1345,7 @@ $('.layer_up').click(function(event) {
     if (selectedObj) {
 
         canvas.bringForward(selectedObj);
+
     }
     //selectedObj.bringToFront();
 
@@ -1520,46 +1500,46 @@ $("#tbx").on('input', function(e) {
     activeObj = canvas.getActiveObject();
     isSelectedColor = true;
     if ($('#fillcolor').css('background-image') == "none") {
-        if ($('#strokecolor').css('background-image') == "none") {
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
-        } else {
+         if ($('#strokecolor').css('background-image') == "none") {
+             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
+         } else {
 
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $('#fillcolor').css('background-color'), $(this).next().attr('id'));
-        }
+             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $(this).next().attr('id'));
+         }
 
-    }
-    if ($('#fillcolor').css('background-image') != "none") {
-        if ($('#strokecolor').css('background-image') == "none") {
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $(this).next().attr('id'), $('#strokecolor').css('background-color'));
-        } else {
+     }
+    else if ($('#fillcolor').css('background-image') != "none") {
+         if ($('#strokecolor').css('background-image') == "none") {
+             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
+         } else {
+             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').attr('data-id'), $('#strokecolor').attr('data-id'));
+            
+         }
 
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $(this).next().attr('id'), $(this).next().attr('id'));
-        }
-
-    }
+     }
 
 });
 $('#dlFonts_form').change(function() {
     activeObj = canvas.getActiveObject();
     isSelectedColor = true;
     if ($('#fillcolor').css('background-image') == "none") {
-        if ($('#strokecolor').css('background-image') == "none") {
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
-        } else {
+         if ($('#strokecolor').css('background-image') == "none") {
+             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $('#strokecolor').css('background-color'));
+         } else {
 
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $('#fillcolor').css('background-color'), $(this).next().attr('id'));
-        }
+             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').css('background-color'), $(this).next().attr('id'));
+         }
 
-    }
-    if ($('#fillcolor').css('background-image') != "none") {
-        if ($('#strokecolor').css('background-image') == "none") {
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $(this).next().attr('id'), $('#strokecolor').css('background-color'));
-        } else {
+     }
+    else if ($('#fillcolor').css('background-image') != "none") {
+         if ($('#strokecolor').css('background-image') == "none") {
+             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $(this).next().attr('id'), $('#strokecolor').css('background-color'));
+         } else {
+             product.updateTextDesign(activeObj, $('#dlFonts_form').val(), activeObj.text, $('#fillcolor').attr('data-id'), $('#strokecolor').attr('data-id'));
+            
+         }
 
-            product.updateTextDesign(activeObj, $('#dlFonts_form').val(), $("#tbx").val(), $(this).next().attr('id'), $(this).next().attr('id'));
-        }
-
-    }
+     }
 
 
 });
@@ -1617,10 +1597,7 @@ function grayCanvasBound() {
 }
 
 
-function checkText(e) {
-
-    var b = e.target;
-    var c = this;
+function checkText() {
     var selectedObj = canvas.getActiveObject();
     var ratio = selectedObj.getWidth() / selectedObj.getHeight();
     var selectedObjId = selectedObj.id;
@@ -1636,7 +1613,6 @@ function checkText(e) {
     } else {
         $('#' + cid).css('transform', 'rotate(' + angle + 'deg) scale(' + ratio + ',1)');
     }
-
 }
 
 function updatelayersection() {
@@ -1671,7 +1647,25 @@ $('#gotext').click(function() {
     $('.edittextbox').hide();
     $('#tbx').val($('#tbxbefore').val());
     $('.texteditor').show();
-    product.drawCharacters($('#dlFonts_form').val(), $('#tbx').val(), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, $("#fillcolor").css("background-color"), $("#strokecolor").css("background-color"), activePlacement.ID,activePlacement);
+    if ($('#fillcolor').css('background-image') == "none") {
+         if ($('#strokecolor').css('background-image') == "none") {
+            product.drawCharacters($('#dlFonts_form').val(), $('#tbx').val(), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, $("#fillcolor").css("background-color"), $("#strokecolor").css("background-color"), activePlacement.ID,activePlacement);
+
+         } else {
+            product.drawCharacters($('#dlFonts_form').val(), $('#tbx').val(), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, $("#fillcolor").css("background-color"), $("#strokecolor").attr("data-id"), activePlacement.ID,activePlacement);
+         }
+
+     }
+    else if ($('#fillcolor').css('background-image') != "none") {
+         if ($('#strokecolor').css('background-image') == "none") {
+            product.drawCharacters($('#dlFonts_form').val(), $('#tbx').val(), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, $("#fillcolor").attr("data-id"), $("#strokecolor").css("background-color"), activePlacement.ID,activePlacement);
+
+         } else {
+            product.drawCharacters($('#dlFonts_form').val(), $('#tbx').val(), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, $("#fillcolor").attr('data-id'), $("#strokecolor").attr('data-id'), activePlacement.ID,activePlacement);
+
+         }
+
+     }
 
     $('cliparteditor').hide();
 });
