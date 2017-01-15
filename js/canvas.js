@@ -191,15 +191,16 @@ Product.prototype.refreshDesign = function(item) {
    for (var j = 0; j < k; j++) {
       if(designs[j].objType == "image")
       {
-         console.log(designs[j]);
          product.updateImageDesign(designs[j], -1, "");
       }
       else if(designs[j].objType == "text")
       {
-         console.log($('#dlFonts_form').val()+"_"+designs[j].text+"_"+designs[j].left+"_"+designs[j].top+"_"+designs[j].fillColor+"_"+designs[j].strokeColor+"_"+items.ID+"_"+items);
          product.updateTextDesign(designs[j], $('#dlFonts_form').val(), designs[j].text, designs[j].fillColor, designs[j].strokeColor);
       }
    }
+   $('.texteditor').hide();
+   $('.cliparteditor').hide();
+   $('.edittextbox').hide();
 };
 Product.prototype.removeGrayGrid = function(obj) {
     var removegrayobj = [];
@@ -526,7 +527,13 @@ Product.prototype.updateTextDesign = function(item, fontid, str, fillcolor, stro
         return;
     }
     var that = $('#clipart_layer').find('#text_' + item.id);
-
+    if($('#clipart_layer').find('#text_' + item.id).attr('id') == undefined)
+    {
+      var id = item.id;
+       $('#clipart_layer').find('li.active').removeClass('active');
+       $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><canvas width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></canvas></a></li>');
+       that = $('#clipart_layer').find('#text_' + id);
+    }
     var changeitem = getCharacters(fontid, item.text, fillcolor, strokecolor, that, item.left, item.top);
 
     changeitem.set('id', item.id);
@@ -560,9 +567,9 @@ Product.prototype.updateTextDesign = function(item, fontid, str, fillcolor, stro
     // $('#clipart_layer').prepend('<li class="active" data-id="text_' + id + '"><a data-href="#"><img width="35" height="35" style="border-color:1px solid gray" id="text_' + id + '"></a></li>');
 };
 $(document).ajaxStart(function() {
-    $('.container-fluid').css('cursor', 'wait');
+    $('body').css('cursor', 'wait');
 }).ajaxComplete(function() {
-    $('.container-fluid').css('cursor', 'initial');
+    $('body').css('cursor', 'initial');
 });
 
 function login() {
@@ -1358,7 +1365,7 @@ $('.layer_up').click(function(event) {
         return;
     if (selectedObj) {
 
-        selectedObj.bringForward();
+        canvas.bringForward(selectedObj);
     }
     //selectedObj.bringToFront();
 
@@ -1381,11 +1388,10 @@ $('.layer_down').click(function(event) {
     console.log($('#clipart_layer li:last-child').attr('data-id') + "_" + selectedObj.id);
     var as = $('#clipart_layer li:last-child').attr('data-id').split("_");
     if (as[1] == selectedObj.id) {
-        alert(1);
         return;
     }
     if (selectedObj) {
-        selectedObj.sendBackwards();
+        canvas.sendBackwards(selectedObj);
     }
 
     var id = selectedObj.id;
@@ -1405,7 +1411,7 @@ $('.position_center').click(function(event) {
         return;
 
     selectedObj.left = parseInt(canvas.getWidth() / 2, 10);
-    canvas.renderAll();
+    //canvas.renderAll();
     canvas.setActiveObject(selectedObj);
 });
 
@@ -1471,6 +1477,7 @@ $('.placement-modal .modal-body').on('click', 'div', function() {
 });
 
 $('#select_placement').click(function(event) {
+    var prevobj = activePlacement;
     var pobj = product.getPlacement($('.placement-modal .modal-body').find('.active').children('img').attr('data-id'));
     if (product.Design_List.length > 0) {
 
@@ -1479,25 +1486,35 @@ $('#select_placement').click(function(event) {
             return;
         } else {
             if ($('.placement-modal .modal-body').find('.active').hasClass('selectdesign')) {
-                activePlacement = product.getPlacement(pobj.ID);
+                activePlacement = pobj;
             } else {
                 product.addPlacement(pobj.Name, pobj.PreviewImage, pobj.ID);
-                activePlacement = product.getPlacement(pobj.ID);
+                activePlacement = pobj;
             }
         }
 
     } else {
         product.addPlacement(pobj.Name, pobj.PreviewImage, pobj.ID);
-        activePlacement = product.getPlacement(pobj.ID);
+        activePlacement = pobj;
     }
 
     $('#placement').attr('src', $('.placement-modal .modal-body').find('.active').children('img').attr('src'));
     $('.placement-modal .modal-body').find('.active').addClass('selectdesign');
     $('.placement-modal .close').click();
-    product.removeGrayGrid(canvas.getObjects());
-    var ratio = product.drawGrayGrid(activePlacement);
-    activePlacement.ratio = ratio;
-    product.refreshDesign(activePlacement);
+    if(prevobj == null)
+    {
+       product.removeGrayGrid(canvas.getObjects());
+       var ratio = product.drawGrayGrid(activePlacement);
+       activePlacement.ratio = ratio;
+       product.refreshDesign(activePlacement);
+    }
+    else if(prevobj.ID !=activePlacement.ID)
+    {
+       product.removeGrayGrid(canvas.getObjects());
+       var ratio = product.drawGrayGrid(activePlacement);
+       activePlacement.ratio = ratio;
+       product.refreshDesign(activePlacement);
+    }
 });
 $("#tbx").on('input', function(e) {
     activeObj = canvas.getActiveObject();
@@ -1677,8 +1694,6 @@ $('body').on('click', '#listClipArt li', function(event) {
     $('.edittextbox').hide();
     product.drawClipArt($(this).attr('id'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, activePlacement.ID,activePlacement);
 });
-
-
 $('body').on('click', '.cliparteditor .colorpicker', function(e) {
     if ($('.cliparteditor .firstp').css("display") == "none") {
 
