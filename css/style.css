@@ -229,9 +229,8 @@ select.prod-sort {
 }
 
 .pane {
-	border:1px solid #dcdcdc;
 	width:100%;
-	/*padding:15px;*/
+    height: 100%;
 	z-index:1;
 	background-color:rgba(255,255,255.0.95);
 	border-bottom-left-radius: 5px;
@@ -294,7 +293,10 @@ select.prod-sort {
     height: 28px;
 	margin-top: 3px;
 }
-
+.colorlayer li a{
+    
+    border: 1px solid #eee;
+}
 .send_backward {
 	background: url(../image/image_grp.png) top center no-repeat;
 	background-position: 0 -2653px;
@@ -437,15 +439,22 @@ input[type=range]:focus::-ms-fill-upper {
     background-color: red;
     color: white;
 }
-
+.placementeditor *{
+    height:30%;
+    /*position: relative;
+    float: left;*/
+}
+#addplacementbtn{
+    float: right;
+}
 .tab_custom{
-    
+    height: 100%;
     background: #eee;
-    height: 292px; 
     padding-right: 0px; 
     padding-left: 0px; 
     overflow: auto;
     margin-right: 10px;
+    width:65px;
 }
 
 
@@ -456,35 +465,25 @@ input[type=range]:focus::-ms-fill-upper {
     padding: 0px 4px;
 }
 .womenimg{
-    z-index: 999;
-    margin: 10px;
+    
     width: 100px;
-    height: 140px;
 }
 .shirtimg{
-    z-index: 9999;
-    margin : 10px;
+    
+    
     width: 100px;
-    height: 140px;
+    height: 120px;
+}
+
+.placementeditor .col-md-2{
+    padding: 2px;
+    text-align: center;
 }
 .col-md-4.editcolorbox{
     z-index: 998;
     margin-left: 0px;
     padding-top: 100px;
-    /*width:630px !important;*/
-
-}
-.col-md-offset-1{
-    /*margin-left: 157px !important;*/
-}
-.col-md-7{
-    /*width: 1109px !important;*/
-}
-.col-sm-4.editcolorbox{
-    z-index: 998;
-    margin-left: 0px;
-    padding-top: 100px;
-    /*width:630px !important;*/
+    height: 705px !important;
 
 }
 .toolbox{
@@ -592,7 +591,4 @@ textarea{
 }
 .container-fluid{
     width:1905px;
-}
-.colorlayer .active{
-    box-shadow: 2px 2px 8px #aaa; 
 }

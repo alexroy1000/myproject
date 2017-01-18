@@ -73,15 +73,15 @@ Product.prototype.setSelectObj = function(item) {
         for (var i = 0; i < ca.CanvasObject.Colors.length; i++) {
             var colstr = ca.CanvasObject.Colors[i].HtmlColor;
             if (!colstr.includes("img")) {
-
-                html += '<a class="btn btn-default colorpicker selectcolor" data-id="' + i +
+               
+                html += '<li><a data-toggle="tab" href="#home" class="btn btn-default colorpicker selectcolor" data-id="' + i +
                     '" style="background-color: ' +
                     ca.CanvasObject.Colors[i].HtmlColor +
-                    '"></a>';
+                    '"></a></li>';
             } else {
                 var imgstr = $('.cliparteditor .colorlayer').children().eq(i).css('background-image');
-                html += "<a class='btn btn-default colorpicker selectcolor' data-id='" + i +
-                    "' style='background-image : " + imgstr + ";background-color:" + ca.CanvasObject.Colors[i].HtmlColor + "'></a>";
+                html += "<li> <a data-toggle='tab' href='#home' class='btn btn-default colorpicker selectcolor' data-id='" + i +
+                    "' style='background-image : " + imgstr + ";background-color:" + ca.CanvasObject.Colors[i].HtmlColor + "'></a></li>";
             }
 
         }
@@ -114,7 +114,7 @@ Product.prototype.setSelectObj = function(item) {
         $('.cliparteditor .colorlayer').find('a.active').removeClass('active');
         $('.cliparteditor .colorlayer').find("[data-id='" + i + "']").addClass('active');
         $('.cliparteditor .firstp').show();
-        $('.cliparteditor .secondp').hide();
+        //$('.cliparteditor .secondp').hide();
         $('.edittextbox').hide();
         $('#clipart_width_text,  #clipart_width_range').val(parseFloat(item.getWidth()));
         $('#clipart_height_text, #clipart_height_range').val(parseFloat(item.getHeight()));
@@ -172,7 +172,7 @@ Product.prototype.setSelectObj = function(item) {
         $('#fillcolor').css('background-color', item.fillColor);
         $('#strokecolor').css('background-color', item.strokeColor);
         $('.texteditor .firstp').show();
-        $('.texteditor .secondp').hide();
+        //$('.texteditor .secondp').hide();
         $('.edittextbox').hide();
     }
 };
@@ -235,15 +235,10 @@ Product.prototype.drawGrayGrid = function(obj) {
     }
     var gridlp = canvas.width / 2 - w / 2; // <= you must define this with final grid width
     var gridtp = canvas.height / 2 - h / 2; // <= you must define this with final grid height
-    graytlx = gridlp;
-    graytly = gridtp;
     graywidth = w;
     grayheight = h;
     var groupArray = [];
-    // to manipulate grid after creation
-
     var gridSize = 10; // define grid size
-
     // define presentation option of grid
     var lineOption = {
         stroke: '#fff',
@@ -251,7 +246,6 @@ Product.prototype.drawGrayGrid = function(obj) {
         selectable: false,
         strokeDashArray: [0, 0]
     };
-
     // do in two steps to limit the calculations
     // first loop for vertical line
     for (var i = Math.ceil(w / gridSize); i--;) {
@@ -391,8 +385,7 @@ Product.prototype.drawClipArt = function(clipartid, x, y, placementID , pitem) {
                 $('#clipart_angle_text,  #clipart_angle_range').val(item.getAngle());
                 product.setSelectObj(item);
             }
-        },
-        async: true
+        }
     });
 }
 Product.prototype.updateImageDesign = function(item, is, colorstr) {
@@ -595,6 +588,11 @@ function login() {
                 var mycanvas = document.getElementById('myCanvas');
                 var myctx = mycanvas.getContext('2d');
                 drawGrid();
+                console.log(placementList);
+                product.addPlacement("Full Front", "full_front.png", 1);
+                activePlacement = product.getPlacement(1);
+                var ratio = product.drawGrayGrid(activePlacement);
+                activePlacement.ratio = ratio;
 
             }
         },
@@ -613,6 +611,7 @@ function listPlacement() {
         contentType: "application/json; charset=utf-8",
         data: JSON.stringify($.xml2json(xml)),
         dataType: "json",
+        async:false,
         success: function(response) {
             var r = response.PlacementListResult;
             if (r.isSuccessful == false) {
@@ -654,7 +653,6 @@ function listClipArt() {
                         "data-type": "image",
                         "data-name": c.Name,
                         "data-locksize": c.LockSize,
-
                     }));
 
                 }
@@ -976,7 +974,7 @@ function drawGrid() {
 
 function getColorPalette() {
 
-    $('.tab_custom').css("height", $('.colortab_custom'));
+    // $('.tab_custom').css("height", $('.colortab_custom'));
     var col_array = [];
     var col_name_array = [];
     var img_dir_array = [];
@@ -1058,8 +1056,8 @@ function getColorPalette() {
 
 // Select a color layer.
 
-$('body').on('click', '.cliparteditor .colorlayer a', function(event) {
-    $('.cliparteditor .colorlayer').find('a.active').removeClass('active');
+$('body').on('click', '.cliparteditor .colorlayer li', function(event) {
+    $('.cliparteditor .colorlayer').find('li.active').removeClass('active');
     $(this).addClass('active');
 });
 $('body').on('click', '.texteditor .colorlayer a', function(event) {
@@ -1432,10 +1430,9 @@ $('body').on('click', '#clipart_layer li', function(e) {
     }
 
 });
-$('#placement').click(function(e) {
+$('#addplacementbtn').click(function() {
     if (product.Design_List.length > 0) {
         for (var i = 0; i < product.Design_List.length; i++) {
-
             var pobj = product.getPlacement(product.Design_List[i].placementID);
             if (pobj.Overlap != null) {
                 var overlaps = pobj.Overlap.split(",");
@@ -1583,17 +1580,37 @@ canvas.on({
 });
 
 function grayCanvasBound() {
-    // var selectedObj = canvas.getActiveObject();
-    // lpos = selectedObj.getBoundingRect().left;
-    // tpos = selectedObj.getBoundingRect().top;
-    // gwidth = selectedObj.getBoundingRect().width;
-    // gheight = selectedObj.getBoundingRect().height;
-    // // graytlx = gridlp;
-    // // graytly = gridtp;
-    // // graywidth = w;
-    // // grayheight = h;
-    // // if((graytlx>lpos && graytly<tpos) || (graytlx+graywidth>lpos+gwidth && graytly+grayheight<tpos+gheight) || )
-    // //if(selectedObj)
+   var originleft = 0;
+   var origintop = 0;
+   var originwidth = 0;
+   var originheight = 0;
+   var getobj = canvas.getObjects();
+   for (var i = 0; i < getobj.length; i++) {
+      if(getobj[i].objType != undefined)
+      {
+         if(getobj[i].objType == "backplacementID")
+         {
+            originleft = getobj.left;
+            origintop = getobj.top;
+            originwidth = getobj.width;
+            originheight = getobj.height;
+            break;
+
+         }
+      }
+
+   }
+    var selectedObj = canvas.getActiveObject();
+    lpos = selectedObj.getBoundingRect().left;
+    tpos = selectedObj.getBoundingRect().top;
+    gwidth = selectedObj.getBoundingRect().width;
+    gheight = selectedObj.getBoundingRect().height;
+    if((originleft>lpos && origintop>tpos))
+    {
+      console.log(selectedObj);
+    }
+    // if((graytlx>lpos && graytly<tpos) || (graytlx+graywidth>lpos+gwidth && graytly+grayheight<tpos+gheight) || )
+    //if(selectedObj)
 }
 
 
@@ -1672,12 +1689,10 @@ $('#gotext').click(function() {
 jQuery(document).ready(function() {
     product = new Product();
     login();
-    jQuery('#placement').click();
-    jQuery('.secondp').hide();
+    //jQuery('.secondp').hide();
     jQuery(".tabcontent").children().hide();
     jQuery(".tabcontent").children().first().show();
     jQuery('.colortab_custom').hide();
-    jQuery('.tab_custom').height(jQuery('.colortab_custom').height());
     acc[0].classList.toggle("active");
     acc[0].nextElementSibling.classList.toggle("show");
     accc[0].classList.toggle("active");
@@ -1689,38 +1704,33 @@ $('body').on('click', '#listClipArt li', function(event) {
     product.drawClipArt($(this).attr('id'), $('#myCanvas').width() / 2, $('#myCanvas').height() / 2, activePlacement.ID,activePlacement);
 });
 $('body').on('click', '.cliparteditor .colorpicker', function(e) {
-    if ($('.cliparteditor .firstp').css("display") == "none") {
+    // if ($('.cliparteditor .firstp').css("display") == "none") {
 
-        $('.cliparteditor .firstp').show();
-        $('.cliparteditor .secondp').hide();
-    } else if ($('.cliparteditor .firstp').css("display") == "block") {
-        $('.cliparteditor .firstp').hide();
-        $('.cliparteditor .secondp').show();
-    }
-    $('.tab_custom').css("height", $('.colortab_custom').css("height"));
+    //     $('.cliparteditor .firstp').show();
+    //     $('.cliparteditor .secondp').hide();
+    // } else if ($('.cliparteditor .firstp').css("display") == "block") {
+    //     $('.cliparteditor .firstp').hide();
+    //     $('.cliparteditor .secondp').show();
+    // }
+    // $('.tab_custom').css("height", $('.colortab_custom').css("height"));
 });
 $('body').on('click', '.texteditor .colorpicker', function(e) {
-    if ($('.texteditor .firstp').css("display") == "none") {
+    // if ($('.texteditor .firstp').css("display") == "none") {
 
-        $('.texteditor .firstp').show();
-        $('.texteditor .secondp').hide();
-    } else if ($('.texteditor .firstp').css("display") == "block") {
-        $('.texteditor .firstp').hide();
-        $('.texteditor .secondp').show();
-    }
-    $('.tab_custom').css("height", $('.colortab_custom').css("height"));
-});
-
-$('body').on('click', '.closebtn', function(e) {
-    $('.secondp').hide();
-    $('.firstp').show();
+    //     $('.texteditor .firstp').show();
+    //     $('.texteditor .secondp').hide();
+    // } else if ($('.texteditor .firstp').css("display") == "block") {
+    //     $('.texteditor .firstp').hide();
+    //     $('.texteditor .secondp').show();
+    // }
+    // $('.tab_custom').css("height", $('.colortab_custom').css("height"));
 });
 var i;
 var acc = document.getElementsByClassName("accordion");
 var accc = document.getElementsByClassName("accordion1");
 for (i = 0; i < acc.length; i++) {
     acc[i].onmousedown = function() {
-        $('.tab_custom').height();
+       
         $('.secondp').find('.accordion').removeClass('active');
         $('.secondp').find('.panel').removeClass('show');
         this.classList.toggle("active");
@@ -1730,7 +1740,6 @@ for (i = 0; i < acc.length; i++) {
 }
 for (i = 0; i < accc.length; i++) {
     accc[i].onmousedown = function() {
-        $('.tab_custom').height();
         $('.secondp').find('.accordion1').removeClass('active');
         $('.secondp').find('.panel1').removeClass('show');
         this.classList.toggle("active");

@@ -17,7 +17,7 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-8 col-sm-8" style="padding-left: 50px">
+            <div class="col-md-8 col-sm-8" style="padding-left: 50px; height: 800px; overflow-y: auto;">
                 <canvas id="myCanvas" width="1200" height="800" style="border: 1px solid #aaa"></canvas>
             </div>
             <div class="col-md-4 editcolorbox col-sm-4">
@@ -46,11 +46,11 @@
                     <div class="row pane editcolor">
                         <div class="col-md-2 tab_custom">
                             <ul class="nav nav-pills nav-stacked" id="clipart_layer">
-
+    
                             </ul>
                         </div>
-                        <div class="col-md-9">
-                            <div class="row">
+                        <div class="col-md-10" style="height:100%">
+                            <div class="row" style="height:70%">
                                 <div class="colortab_custom">
                                     <div class="edittextbox" style="display: none;">
                                         <div class="row">
@@ -58,7 +58,7 @@
                                                 <textarea name="" rows="4" placeholder="-- enter your text here --" id="tbxbefore" class="form-control" style="font-size: 11px"></textarea>
                                             </div>
                                             <div class="col-md-12">
-                                                <button class="btn btn-primary" id="gotext" style="float: right;">Add To Design</button>
+                                                <button class="btn btn-primary" id="gotext" style="float: right;">Add To Text</button>
                                             </div>
                                         </div>
                                     </div>
@@ -82,7 +82,7 @@
                                             <div class="col-md-2">
                                                 <label for="">Stroke</label><br>
                                                 <div class="colorlayer">
-                                                    <a class="btn btn-default colorpicker selectcolor" id="strokecolor" style="background-color:#1c1a1c;"></a>
+                                                    <a class="btn btn-default colorpicker selectcolor" id="strokecolor" style="background-image: url(image/trans-color.png);" data-id = "none"></a>
                                                 </div>
                                             </div>
                                         </div>
@@ -93,6 +93,7 @@
                                                 </div>
                                                 <div class="col-md-7">
                                                     <input class="rangesty" type="range" min="30" max="300" step="1" id="clipart_stretch_range" pattern="[0-9]*" value="100">
+                                                    <span class="lockimg" id="lock" data-lock="true" style="position:relative;float:left"></span>
                                                 </div>
                                                 <div class="col-md-2">
                                                     <input class="text_radis form-control" type="number" min="30" max="300" step="1" id="clipart_stretch_text" pattern="[0-9]*" value="100">
@@ -107,9 +108,7 @@
                                                 </div>
                                                 <div class="col-md-2">
                                                     <input class="text_radis form-control" type="number" min="0.5" max="3" step="0.1" id="clipart_lnheight_text" pattern="[0-9]*">
-                                                </div>
-                                                <div class="col-md-1">
-                                                    <span class="lockimg" id="lock" data-lock="true"></span>
+                                                    
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -117,10 +116,10 @@
                                                     <span class="span_bold">Spacing</span>
                                                 </div>
                                                 <div class="col-md-7">
-                                                    <input class="rangesty" type="range" min="-30" max="100" step="1" id="clipart_spacing_range" pattern="[0-9]*" value="1">
+                                                    <input class="rangesty" type="range" min="-50" max="50" step="1" id="clipart_spacing_range" pattern="[0-9]*" value="0">
                                                 </div>
                                                 <div class="col-md-2">
-                                                    <input class="text_radis form-control" type="number" min="-30" max="100" step="1" id="clipart_spacing_text" pattern="[0-9]*" value="1">
+                                                    <input class="text_radis form-control" type="number" min="-50" max="50" step="1" id="clipart_spacing_text" pattern="[0-9]*" value="0">
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -175,24 +174,6 @@
                                         </div>
                                         <div class="secondp">
                                             <div class="row">
-                                                <div class="col-md-8">
-                                                    <h5>Then Select A New Color</h5>
-                                                    <!-- 
-                                                <h6>ink color(s) currently in your design:</h6>
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="colordiv">
-                                                            <a class="btn btn-default colorpicker selectcolor"></a>
-                                                            <a class="btn btn-default colorpicker selectcolor"></a>
-                                                        </div>
-                                                    </div>
-                                                </div> -->
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <button class="btn btn-default closebtn">x</button>
-                                                </div>
-                                            </div>
-                                            <div class="row">
                                                 <div class="col-md-12">
                                                     <buttion class="accordion" id="colorx">
                                                         <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span> Ink Color
@@ -227,16 +208,45 @@
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="cliparteditor">
-                                        <h4>Edit Color</h4>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="colordiv colorlayer">
-                                                    <a class="btn btn-default colorpicker selectcolor"></a>
+                                        <ul class="nav nav-tabs colordiv colorlayer"> 
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div id="home" class="tab-pane fade secondp in active">
+                                                <div class="row">
+                                                <div class="col-md-12">
+                                                    <buttion class="accordion1" id="colorx">
+                                                        <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span> Ink Color</buttion>
+                                                    <div class="panel1">
+                                                        <div class="row">
+                                                            <div class="col-md-12" id="colorpad">
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                                </div>
+                                                <div class="row">
+                                                <div class="col-md-12">
+                                                    <buttion class="accordion1" id="patternx"><span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span> Pattern</buttion>
+                                                    <div class="panel1">
+                                                        <div class="row">
+                                                            <div class="col-md-12" id="patternpad">
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                </div>
+                                                <div class="row">
+                                                <div class="col-md-12" style="margin-bottom: 4px;">
+                                                    <a href="#" class="btn btn-default selectcolor" title="Shirt Color" style="background: url(image/trans-color.png);"></a>
+                                                    <span> No Ink(Shirt fabric will show through)</span>
+                                                </div>
+                                                </div>
+                                            </div> 
                                         </div>
+                                        
                                         <div class="firstp">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -255,12 +265,11 @@
                                                 </div>
                                                 <div class="col-md-7">
                                                     <input class="rangesty" type="range" min="0.1" max="2000" id="clipart_height_range" pattern="[0-9]*">
+                                                    <span class="lockimg" id="lock" data-lock="true" style="position:relative;float:left"></span>
                                                 </div>
                                                 <div class="col-md-2">
                                                     <input class="text_radis form-control" type="number" min="0.1" max="2000" id="clipart_height_text" pattern="[0-9]*">
-                                                </div>
-                                                <div class="col-md-1">
-                                                    <span class="lockimg" id="lock" data-lock="true"></span>
+                                                    
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -303,81 +312,32 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="secondp">
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <h5>Then Select A New Color</h5>
-                                                    <!-- 
-                                                <h6>ink color(s) currently in your design:</h6>
-                                                <div class="row">
-                                                    <div class="col-md-12">
-                                                        <div class="colordiv">
-                                                            <a class="btn btn-default colorpicker selectcolor"></a>
-                                                            <a class="btn btn-default colorpicker selectcolor"></a>
-                                                        </div>
-                                                    </div>
-                                                </div> -->
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <button class="btn btn-default closebtn">x</button>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <buttion class="accordion1" id="colorx">
-                                                        <span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span> Ink Color</buttion>
-                                                    <div class="panel1">
-                                                        <div class="row">
-                                                            <div class="col-md-12" id="colorpad">
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12">
-                                                    <buttion class="accordion1" id="patternx"><span class="glyphicon glyphicon-menu-down" aria-hidden="true"></span> Pattern</buttion>
-                                                    <div class="panel1">
-                                                        <div class="row">
-                                                            <div class="col-md-12" id="patternpad">
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-12" style="margin-bottom: 4px;">
-                                                    <a href="#" class="btn btn-default selectcolor" title="Shirt Color" style="background: url(image/trans-color.png);"></a>
-                                                    <span> No Ink(Shirt fabric will show through)</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <img class="img-responsive womenimg" src="image/shirt_preview.png">
+                            <div class="row placementeditor">
+                                <div class="col-md-11">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <img class="img-responsive womenimg" src="image/shirt_preview.png">
+                                            <h5>LPC54</h5>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <img class="img-responsive shirtimg" id="placement" src="image/placement_fullfront.png" >
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <img class="img-responsive shirtimg" id="placement" src="image/placement_fullfront.png" data-toggle="modal" data-target=".placement-modal">
+                                <div class="col-md-1">
+                                    <button class="btn btn-primary" data-toggle="modal" data-target=".placement-modal" id="addplacementbtn">Add New Design</button>
                                 </div>
-                                <div class="col-md-4">
-                                    &nbsp;
-                                </div>
+                                
+                                    
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!--  <span style="margin-left: 5px; width: 30px; height: 30px; padding: 4px 4px 2px 4px; background-color: #59bfe5; color: white">
-            <i class="glyphicon glyphicon-refresh"></i>
-        </span> -->
-            <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-lg">Large modal</button> -->
-
             <div class="modal fade placement-modal" tabindex="-1" data-backdrop="static" role="dialog" aria-labelledby="myLargeModalLabel">
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
@@ -396,17 +356,12 @@
                     </div>
                 </div>
             </div>
-            <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.3/fabric.min.js"></script> -->
             <script type="text/javascript" src="js/fabric-1.6.6.js"></script>
             <script type="text/javascript" src="js/customiseControls.min.js"></script>
             <script type="text/javascript" src="js/fabric-canvas.js"></script>
-            <!-- <script type="text/javascript" src="js/fabric.curvedText.js"></script> -->
             <script type="text/javascript" src="js/canvas.js"></script>
             <script type="text/javascript" crossorigin="anonymous">
-                // acc[0].classList.toggle("active");
-                // acc[0].nextElementSibling.classList.toggle("show");
             </script>
-            <!-- <script type="text/javascript" src="js/fabric.min.js"></script> -->
 
 </body>
 
